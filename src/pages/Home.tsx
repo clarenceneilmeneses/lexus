@@ -64,75 +64,93 @@ export default function Home() {
     <div className="bg-corp-bg">
       <SectionNav sections={SECTIONS} />
 
-      {/* ============================ HERO — full-bleed video ============================ */}
-      <section id="top" className="relative h-[96vh] min-h-[680px] w-full overflow-hidden bg-black text-white">
-        <video
-          ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover"
-          src={LEXUS_VIDEO}
-          poster={IMG.facade}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-        />
-        {/* darker on the left for left-aligned copy */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/30" />
-
-        {/* column: nav offset → left copy (flex-1) → stats strip in flow */}
-        <div className="relative h-full wrap flex flex-col">
-          <div className="flex-1 flex flex-col items-start justify-center text-left pt-24 pb-10 max-w-3xl">
-            <span className="font-mono text-[12px] tracking-[0.22em] uppercase text-white/70">
-              {hero.eyebrow || "Interior finishings & building materials · Since 1995"}
-            </span>
-            <h1 className="text-[clamp(38px,6.6vw,82px)] font-semibold tracking-[-0.02em] leading-[1.03] mt-5">
-              {hero.title}
-            </h1>
-            <p className="text-[clamp(16px,2.1vw,22px)] text-white/85 mt-5 max-w-xl leading-relaxed">{hero.subtitle}</p>
-            <div className="flex items-center gap-5 mt-9 flex-wrap">
-              <Link to="/products" className="inline-flex items-center justify-center font-display font-semibold text-[15px] rounded-full px-7 py-3 bg-corp-orange text-white hover:bg-corp-orangeD transition-colors">
-                {hero.cta_label || "Browse products"}
-              </Link>
-              <a href="#contact" className="group inline-flex items-center gap-1 font-display font-semibold text-[15px] text-white">
-                Request a quote
-                <span className="transition-transform group-hover:translate-x-0.5">›</span>
-              </a>
-            </div>
-          </div>
-
-          {/* stats strip — left aligned, in normal flow so it never clips the copy */}
-          <div className="shrink-0 py-5 flex items-center gap-x-12 gap-y-3 flex-wrap border-t border-white/10">
-            {about.stats.slice(0, 3).map((s, i) => (
-              <div key={i} className="flex items-baseline gap-2">
-                <span className="font-display font-bold text-white text-lg">{s.value}</span>
-                <span className="font-mono text-[11px] tracking-[0.12em] uppercase text-white/55">{s.label}</span>
-              </div>
-            ))}
-          </div>
+      {/* ============================ HERO — editorial, contained video ============================ */}
+      <section id="top" className="relative bg-corp-bg pt-8 lg:pt-12 pb-14 lg:pb-20 scroll-mt-20">
+        {/* centered title block */}
+        <div className="wrap text-center max-w-4xl mx-auto">
+          <span className="font-mono text-[11px] sm:text-[12px] tracking-[0.22em] uppercase text-corp-grey">
+            {hero.eyebrow || "Interior finishings & building materials · Since 1995"}
+          </span>
+          <h1 className="font-serif font-medium text-[clamp(40px,7vw,94px)] tracking-[-0.01em] leading-[1.02] text-corp-navy mt-4">
+            {hero.title}
+          </h1>
+          {hero.subtitle && (
+            <p className="text-[clamp(15px,1.9vw,20px)] text-corp-grey max-w-2xl mx-auto mt-5 leading-relaxed">
+              {hero.subtitle}
+            </p>
+          )}
         </div>
 
-        {/* video controls — unmute + fullscreen */}
-        <div className="absolute bottom-24 right-6 sm:right-8 flex items-center gap-2 z-10">
+        {/* controls row above the video */}
+        <div className="wrap mt-9 lg:mt-12 flex items-center justify-between">
           <button
-            onClick={toggleMute}
-            aria-label={muted ? "Unmute video" : "Mute video"}
-            className="w-11 h-11 grid place-items-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 text-white transition-colors"
+            onClick={goFullscreen}
+            className="font-mono text-[11px] tracking-[0.16em] uppercase text-corp-grey hover:text-corp-navy transition-colors"
           >
-            {muted ? (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M11 5 6 9H2v6h4l5 4V5z" /><path d="m23 9-6 6M17 9l6 6" /></svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M11 5 6 9H2v6h4l5 4V5z" /><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14" /></svg>
-            )}
+            Fullscreen
           </button>
           <button
             onClick={goFullscreen}
-            aria-label="Watch fullscreen"
-            className="w-11 h-11 grid place-items-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 text-white transition-colors"
+            aria-label="Expand video to fullscreen"
+            className="w-8 h-8 grid place-items-center text-corp-grey hover:text-corp-navy transition-colors"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M16 21h3a2 2 0 0 0 2-2v-3M8 21H5a2 2 0 0 1-2-2v-3" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg>
           </button>
+        </div>
+
+        {/* cinematic contained video */}
+        <div className="mt-4 mx-auto max-w-[1360px] px-4 sm:px-6">
+          {/* 16:9 frame matched to the source so object-contain never crops the
+              burned-in captions; any spare space stays black (cinematic). */}
+          <div className="relative overflow-hidden bg-black aspect-video">
+            <video
+              ref={videoRef}
+              className="absolute inset-0 w-full h-full object-contain"
+              src={LEXUS_VIDEO}
+              poster={IMG.facade}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10 pointer-events-none" />
+
+            {/* unmute toggle — bottom-left */}
+            <button
+              onClick={toggleMute}
+              aria-label={muted ? "Unmute video" : "Mute video"}
+              className="absolute left-4 bottom-4 sm:left-5 sm:bottom-5 w-10 h-10 grid place-items-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 text-white transition-colors"
+            >
+              {muted ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]"><path d="M11 5 6 9H2v6h4l5 4V5z" /><path d="m23 9-6 6M17 9l6 6" /></svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]"><path d="M11 5 6 9H2v6h4l5 4V5z" /><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14" /></svg>
+              )}
+            </button>
+
+          </div>
+        </div>
+
+        {/* CTA pill — sits below the video so it never covers the captions */}
+        <div className="flex justify-center mt-7">
+          <a
+            href="#services"
+            className="group inline-flex items-center gap-2 rounded-full bg-corp-navy hover:bg-corp-navyD text-white font-display font-semibold text-[14px] px-6 py-3 transition-colors"
+          >
+            {hero.cta_label || "Explore our work"}
+            <span className="transition-transform group-hover:translate-y-0.5">↓</span>
+          </a>
+        </div>
+
+        {/* slim stats strip under the video */}
+        <div className="wrap mt-6 flex items-center justify-center gap-x-10 gap-y-3 flex-wrap">
+          {about.stats.slice(0, 3).map((s, i) => (
+            <div key={i} className="flex items-baseline gap-2">
+              <span className="font-display font-bold text-corp-navy text-lg">{s.value}</span>
+              <span className="font-mono text-[11px] tracking-[0.12em] uppercase text-corp-grey">{s.label}</span>
+            </div>
+          ))}
         </div>
       </section>
 

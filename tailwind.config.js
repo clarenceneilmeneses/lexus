@@ -35,6 +35,8 @@ export default {
         display: ["Archivo", "system-ui", "sans-serif"],
         body: ["Inter", "system-ui", "sans-serif"],
         mono: ['"Space Mono"', "ui-monospace", "monospace"],
+        // Editorial serif — used for the hero display title.
+        serif: ['"Playfair Display"', "Georgia", "serif"],
       },
       borderRadius: { DEFAULT: "4px" },
       maxWidth: { content: "1200px" },
