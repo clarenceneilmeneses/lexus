@@ -111,7 +111,7 @@ export default function Footer({ contact, social = {}, categories = [] }: { cont
         {/* legal row — sits over the grounded photo */}
         <div className="mt-28 sm:mt-36 pt-5 border-t border-white/20 flex flex-wrap justify-between gap-2 text-[12.5px] font-mono text-white/80">
           <span>© {new Date().getFullYear()} Lexus Industrial Enterprise Corporation. All rights reserved.</span>
-          <Link to="/admin" className="hover:text-corp-orange transition-colors">Staff login →</Link>
+          <Link to="/admin" className="hover:text-accent-glow transition-colors">Staff login →</Link>
         </div>
       </div>
     </footer>

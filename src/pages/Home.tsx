@@ -161,7 +161,7 @@ export default function Home() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/60" />
                 <div className="relative">
-                  <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-corp-orange">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-glow">{String(i + 1).padStart(2, "0")}</span>
                   <h3 className="font-display font-semibold text-[26px] lg:text-[30px] text-white tracking-tight mt-2 leading-tight">{it.title}</h3>
                   <p className="text-[15px] text-white/80 mt-3 max-w-sm mx-auto leading-relaxed">{it.body}</p>
                   <Link to="/services" className="inline-flex items-center gap-1 font-display font-semibold text-[14px] text-white mt-5 group/link">
@@ -250,7 +250,7 @@ export default function Home() {
               <img src={IMG.kitchen} alt="Modern kitchen finished with Lexus materials" loading="lazy" className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.04] transition-all duration-700 ease-smooth" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
               <div className="absolute left-6 bottom-6">
-                <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-corp-orange">Residential</span>
+                <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-glow">Residential</span>
                 <div className="font-display font-semibold text-white text-2xl tracking-tight">Kitchens & cabinetry</div>
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function Home() {
               <img src={IMG.dining} alt="Dining interior fit-out" loading="lazy" className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.04] transition-all duration-700 ease-smooth" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               <div className="absolute left-5 bottom-5">
-                <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-corp-orange">Hospitality</span>
+                <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent-glow">Hospitality</span>
                 <div className="font-display font-semibold text-white text-xl tracking-tight">Dining & living spaces</div>
               </div>
             </div>
@@ -266,7 +266,7 @@ export default function Home() {
               <img src={IMG.facade} alt="Building facade supplied by Lexus" loading="lazy" className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.04] transition-all duration-700 ease-smooth" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               <div className="absolute left-5 bottom-5">
-                <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-corp-orange">Commercial</span>
+                <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent-glow">Commercial</span>
                 <div className="font-display font-semibold text-white text-xl tracking-tight">Facades & cladding</div>
               </div>
             </div>
@@ -307,7 +307,7 @@ export default function Home() {
                 <img src={IMG.dining} alt="Interior finished with Lexus materials" loading="lazy" className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-corp-navy/80 to-transparent" />
                 <div className="absolute left-6 bottom-6 right-6">
-                  <div className="font-mono text-[11px] tracking-[0.14em] uppercase text-corp-orange font-bold">Since 1995</div>
+                  <div className="font-mono text-[11px] tracking-[0.14em] uppercase text-accent-glow font-bold">Since 1995</div>
                   <p className="text-white/90 text-[15px] mt-1.5 leading-relaxed">Trusted by the interior design industry across the Philippines.</p>
                 </div>
               </div>

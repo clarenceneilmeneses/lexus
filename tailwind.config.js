@@ -10,8 +10,10 @@ export default {
         line: { DEFAULT: "#E4E7EC", 2: "#EEF0F3" },
         // Royal blue — primary brand / actions
         brand: { DEFAULT: "#1D67CD", d: "#17539F", soft: "#E7F0FB", glow: "#3F86E6" },
-        // Gold — accent (eyebrows, underlines, highlights)
-        accent: { DEFAULT: "#EDCD1F", d: "#CBAE10", soft: "#FBF4CC", glow: "#F4DC4B" },
+        // Logo periwinkle — brand accent (eyebrows, underlines, highlights).
+        // Sampled from the Lexus logo's blue. `glow` is the lighter tint for
+        // accents sitting on dark/navy backgrounds (photos, the admin sidebar).
+        accent: { DEFAULT: "#5560A8", d: "#3B447F", soft: "#E6E8F6", glow: "#AAB2E2" },
         // Red — logo mark accent
         flag: "#EA492E",
         paper: "#F4F5F7",
@@ -21,8 +23,10 @@ export default {
           bg: "#f9f9fb",
           navy: "#32327f",
           navyD: "#262366",
-          orange: "#f79000",
-          orangeD: "#d97e00",
+          // Accent retired from orange to the logo periwinkle (kept the key
+          // name so existing `corp-orange` classes flip site-wide at once).
+          orange: "#5560A8",
+          orangeD: "#3B447F",
           soft: "#dbdbff",
           grey: "#6D6D6D",
         },

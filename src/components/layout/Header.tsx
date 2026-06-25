@@ -13,17 +13,30 @@ const LINKS = [
 ] as const;
 
 export function Brand({ className = "h-9", tone = "light" }: { className?: string; tone?: "light" | "dark" }) {
-  // We only ship a white logo; on light backgrounds render it black via a filter.
+  // We only ship a flat logo silhouette (white PNG with transparency). Recolor
+  // it via CSS mask so it keeps the brand's logo blue on light backgrounds
+  // (tone="dark") and stays white on dark ones — never pure black.
   return (
     <Link to="/" className="flex items-center gap-3 group shrink-0" aria-label="Lexus Industrial — Home">
-      <img
-        src="/brand/logo-white.png"
-        alt="Lexus Industrial Enterprise Corporation"
+      <span
+        role="img"
+        aria-label="Lexus Industrial Enterprise Corporation"
         className={cn(
-          "w-auto object-contain transition-transform duration-200 group-hover:scale-[1.03]",
-          tone === "dark" && "[filter:brightness(0)]",
+          "block w-auto transition-transform duration-200 group-hover:scale-[1.03]",
           className
         )}
+        style={{
+          aspectRatio: "140 / 48",
+          backgroundColor: tone === "dark" ? "#5560A8" : "#ffffff",
+          WebkitMaskImage: "url(/brand/logo-white.png)",
+          maskImage: "url(/brand/logo-white.png)",
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          WebkitMaskPosition: "left center",
+          maskPosition: "left center",
+          WebkitMaskSize: "contain",
+          maskSize: "contain",
+        }}
       />
     </Link>
   );
@@ -141,7 +154,7 @@ export default function Header({ categories = [] }: { categories?: Category[] })
 
                   <aside className="w-[260px] bg-corp-navy text-white p-6 flex flex-col justify-between">
                     <div>
-                      <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-corp-orange font-bold">
+                      <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-glow font-bold">
                         Can't find it?
                       </span>
                       <h3 className="font-display font-semibold text-xl mt-3 leading-snug tracking-tight">

@@ -34,7 +34,7 @@ const NAV: { key: Tab; label: string; icon: JSX.Element; adminOnly?: boolean }[]
 ];
 
 const ROLE_PILL: Record<Role, string> = {
-  admin: "border-corp-orange/50 text-corp-orange",
+  admin: "border-accent-glow/50 text-accent-glow",
   editor: "border-[#137A43]/50 text-[#5fd49a]",
   viewer: "border-white/30 text-[#aeb6c2]",
 };
@@ -91,7 +91,7 @@ export default function AdminApp() {
       >
         <div className="h-[60px] flex items-center gap-2 px-5 border-b border-white/10">
           <Brand className="h-7" />
-          <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-corp-orange border border-corp-orange/40 rounded px-1.5 py-0.5">Admin</span>
+          <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent-glow border border-accent-glow/40 rounded px-1.5 py-0.5">Admin</span>
         </div>
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
           {visibleNav.map((n) => <NavButton key={n.key} n={n} />)}
@@ -101,7 +101,7 @@ export default function AdminApp() {
             <span className={cn("font-mono text-[10px] uppercase tracking-[0.14em] border rounded px-1.5 py-0.5", ROLE_PILL[role])}>{role}</span>
             <span className="font-mono text-[11px] text-[#aeb6c2] truncate">{session.user.email}</span>
           </div>
-          <Link to="/" className="block px-2 font-mono text-[12px] text-[#aeb6c2] hover:text-corp-orange mb-2">View site ↗</Link>
+          <Link to="/" className="block px-2 font-mono text-[12px] text-[#aeb6c2] hover:text-accent-glow mb-2">View site ↗</Link>
           <button className="btn btn-sm bg-white text-corp-navy w-full justify-center" onClick={signOut}>Sign out</button>
         </div>
       </aside>

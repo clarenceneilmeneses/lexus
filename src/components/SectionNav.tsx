@@ -4,8 +4,10 @@ import { cn } from "../lib/utils";
 export interface Section { id: string; label: string; }
 
 /** Fixed vertical scroll-spy on the right edge — shows which homepage section
- *  is in view and lets you jump between them. Uses mix-blend so the dots stay
- *  visible over both the dark hero and the light sections. */
+ *  is in view and lets you jump between them. Dots use mix-blend to stay visible
+ *  over both the dark hero and the light sections; the labels ride in a small
+ *  frosted pill so they read on any background (the blend alone washed them out
+ *  over the white sections). */
 export default function SectionNav({ sections }: { sections: Section[] }) {
   const [active, setActive] = useState(sections[0]?.id ?? "");
 
@@ -33,8 +35,8 @@ export default function SectionNav({ sections }: { sections: Section[] }) {
           <a key={s.id} href={`#${s.id}`} className="group flex items-center justify-end gap-2.5" aria-current={on ? "true" : undefined}>
             <span
               className={cn(
-                "font-mono text-[10px] uppercase tracking-[0.14em] transition-opacity text-white mix-blend-difference",
-                on ? "opacity-100" : "opacity-0 group-hover:opacity-80"
+                "font-mono text-[10px] uppercase tracking-[0.14em] text-corp-navy bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md shadow-card transition-opacity",
+                on ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               )}
             >
               {s.label}
