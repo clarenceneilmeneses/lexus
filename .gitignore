@@ -1,0 +1,17 @@
+node_modules
+dist
+.env
+.env.local
+*.log
+.DS_Store
+
+# build info
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# local design reference material (not part of the app)
+/lexus assets/
+/HOME _ Lexus Industrial_files/
+/Home - Filipinas Multi-Line Corp..html
+/HOME _ Lexus Industrial.html

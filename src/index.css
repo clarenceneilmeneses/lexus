@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+html { scroll-behavior: smooth; }
+body { @apply bg-paper text-ink font-body antialiased; margin: 0; }
+h1, h2, h3, h4 { @apply font-display; letter-spacing: -0.02em; line-height: 1.04; }
+
+/* Selection + scrollbar polish */
+::selection { background: #1D67CD; color: #fff; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-thumb { background: #c9cfd8; border-radius: 99px; border: 3px solid #F4F5F7; }
+::-webkit-scrollbar-thumb:hover { background: #aab2bd; }
+
+@layer components {
+  .wrap { @apply max-w-content mx-auto px-6; }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-mono text-[12px] tracking-[0.18em] uppercase text-brand font-bold;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply inline-block w-6 h-[3px] rounded-full bg-accent;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-display font-bold text-sm tracking-wide rounded px-5 py-3 transition-all duration-200 ease-smooth;
+  }
+  .btn-primary { @apply bg-brand text-white hover:bg-brand-d hover:shadow-glow hover:-translate-y-0.5; }
+  .btn-ghost { @apply border-[1.5px] border-ink text-ink hover:bg-ink hover:text-white; }
+  .btn-light { @apply border-[1.5px] border-white/35 text-white hover:bg-white hover:text-ink; }
+  .btn-gold { @apply bg-accent text-ink hover:bg-accent-d hover:-translate-y-0.5; }
+  .btn-sm { @apply px-3.5 py-2 text-[13px]; }
+
+  /* Forms */
+  .field-label { @apply block font-mono text-[11.5px] tracking-[0.06em] uppercase text-steel mb-1.5; }
+  .input {
+    @apply w-full border border-line rounded px-3.5 py-2.5 text-[15px] bg-white text-ink outline-none transition
+           focus:ring-2 focus:ring-brand/40 focus:border-brand;
+  }
+
+  .panel { @apply bg-white border border-line rounded-md shadow-card p-5; }
+  .tag {
+    @apply font-mono text-[11px] tracking-[0.08em] uppercase text-steel border border-line rounded-sm px-2 py-0.5 inline-block;
+  }
+
+  /* Section heading block */
+  .kicker-row { @apply flex items-end justify-between gap-5 flex-wrap; }
+  .h-section { @apply text-[clamp(28px,4vw,46px)] font-black mt-3 tracking-tight text-ink; }
+  /* Signature gold underline beneath a section title */
+  .underline-gold { @apply relative inline-block pb-3; }
+  .underline-gold::after {
+    content: "";
+    @apply absolute left-0 bottom-0 w-16 h-1 rounded-full bg-accent;
+  }
+
+  /* Hairline grid wrapper (cells separated by 1px lines) */
+  .hairline-grid { @apply grid gap-px bg-line border border-line overflow-hidden rounded-md; }
+
+  /* ---- Light corporate helpers (landing page) ---- */
+  .section-light { @apply bg-corp-bg; }
+  /* Orange corporate eyebrow (variant of .eyebrow) */
+  .eyebrow-corp {
+    @apply inline-flex items-center gap-2 font-mono text-[12px] tracking-[0.18em] uppercase text-corp-orange font-bold;
+  }
+  .eyebrow-corp::before {
+    content: "";
+    @apply inline-block w-6 h-[3px] rounded-full bg-corp-orange;
+  }
+  /* Navy section heading + orange underline (variant of .underline-gold) */
+  .h-corp { @apply text-[clamp(28px,4vw,46px)] font-black mt-3 tracking-tight text-corp-navy; }
+  .underline-orange { @apply relative inline-block pb-3; }
+  .underline-orange::after {
+    content: "";
+    @apply absolute left-0 bottom-0 w-16 h-1 rounded-full bg-corp-orange;
+  }
+  /* Corporate buttons */
+  .btn-corp { @apply bg-corp-navy text-white hover:bg-corp-navyD hover:-translate-y-0.5; }
+  .btn-corp-orange { @apply bg-corp-orange text-white hover:bg-corp-orangeD hover:-translate-y-0.5; }
+  .btn-corp-outline { @apply border-[1.5px] border-corp-navy text-corp-navy hover:bg-corp-navy hover:text-white; }
+
+  /* Apple-style pill buttons (used across public pages) */
+  .pill { @apply inline-flex items-center justify-center gap-1 font-display font-semibold text-[15px] rounded-full px-7 py-3 transition-colors; }
+  .pill-orange { @apply pill bg-corp-orange text-white hover:bg-corp-orangeD; }
+  .pill-navy { @apply pill bg-corp-navy text-white hover:bg-corp-navyD; }
+  .pill-outline { @apply pill border border-corp-navy/25 text-corp-navy hover:border-corp-navy; }
+}
+
+/* Reveal-on-scroll helper (toggled via IntersectionObserver) */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto; animation: none !important; }
+  .reveal { opacity: 1; transform: none; }
+}
+*:focus-visible { outline: 2.5px solid #1D67CD; outline-offset: 2px; }
