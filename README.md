@@ -48,7 +48,7 @@ cp .env.example .env
 ```
 Fill in your project URL and **new** publishable/anon key:
 ```
-VITE_SUPABASE_URL=https://apyeuocfloljuzywofqr.supabase.co
+VITE_SUPABASE_URL=https://bixjdhnrajdqhexoyusb.supabase.co
 VITE_SUPABASE_ANON_KEY=sb_publishable_xxxxxxxx
 ```
 
@@ -76,7 +76,7 @@ Supabase **Edge Function** that re-checks the caller is an admin. Deploy it once
 ```bash
 npm install --save-dev supabase       # the CLI, as a dev dependency
 npx supabase login                    # opens a browser to authorize
-npx supabase link --project-ref apyeuocfloljuzywofqr
+npx supabase link --project-ref bixjdhnrajdqhexoyusb
 npx supabase functions deploy admin-users
 ```
 
