@@ -25,17 +25,34 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+          # Clean the secret: strip whitespace/newlines, surrounding quotes, trailing slash.
+          url="$(printf '%s' "$SUPABASE_URL" | tr -d '[:space:]' | tr -d '"'"'" )"
+          url="${url%/}"
+          key="$(printf '%s' "$SUPABASE_ANON_KEY" | tr -d '[:space:]')"
+
+          if [ -z "$url" ] || [ -z "$key" ]; then
             echo "::error::Missing SUPABASE_URL or SUPABASE_ANON_KEY repo secret."
             exit 1
           fi
-          code=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${SUPABASE_URL}/rest/v1/categories?select=id&limit=1" \
-            -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+          # Show the host being contacted (not secret) so a bad URL is obvious in the log.
+          echo "Pinging host: $(printf '%s' "$url" | sed -E 's#^https?://##; s#/.*$##')"
+          case "$url" in
+            https://*.supabase.co) : ;;
+            *) echo "::warning::SUPABASE_URL doesn't look like https://<ref>.supabase.co — got '$url'";;
+          esac
+
+          code=$(curl -sS -o /dev/null -w "%{http_code}" \
+            "${url}/rest/v1/categories?select=id&limit=1" \
+            -H "apikey: ${key}" \
+            -H "Authorization: Bearer ${key}") && rc=0 || rc=$?
+
+          if [ "${rc:-0}" -ne 0 ]; then
+            echo "::error::curl could not reach Supabase (exit $rc). Check the SUPABASE_URL secret is exactly https://<your-ref>.supabase.co with no quotes or spaces."
+            exit 1
+          fi
           echo "Supabase responded with HTTP $code"
           if [ "$code" != "200" ]; then
-            echo "::error::Keep-alive ping failed (HTTP $code)."
+            echo "::error::Keep-alive ping failed (HTTP $code). 401/403 = wrong anon key; 404 = wrong project URL."
             exit 1
           fi
           echo "Keep-alive ping OK."
