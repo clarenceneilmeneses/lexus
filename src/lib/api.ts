@@ -194,3 +194,39 @@ export async function setUserRole(id: string, role: Role): Promise<void> {
   const { error } = await supabase.from("profiles").update({ role }).eq("id", id);
   if (error) throw error;
 }
+
+/**
+ * Invoke the `admin-users` Edge Function. The function holds the service-role
+ * key and re-verifies that the caller is an admin, so this is safe to call from
+ * the browser. Surfaces the function's JSON `{ error }` body as a real Error.
+ */
+async function invokeAdminUsers(payload: Record<string, unknown>): Promise<any> {
+  const { data, error } = await supabase.functions.invoke("admin-users", { body: payload });
+  if (error) {
+    // Non-2xx responses arrive as FunctionsHttpError with the body on `context`.
+    let message = error.message;
+    const ctx = (error as any).context;
+    if (ctx && typeof ctx.json === "function") {
+      try {
+        const body = await ctx.json();
+        if (body?.error) message = body.error;
+      } catch {
+        /* keep default message */
+      }
+    }
+    if (/Failed to (send|fetch)|FunctionsFetchError|NetworkError/i.test(message)) {
+      message = "Could not reach the user-management function. Has it been deployed? (supabase functions deploy admin-users)";
+    }
+    throw new Error(message);
+  }
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
+export async function adminCreateUser(input: { email: string; password: string; role: Role }): Promise<void> {
+  await invokeAdminUsers({ action: "create", email: input.email, password: input.password, role: input.role });
+}
+
+export async function adminDeleteUser(id: string): Promise<void> {
+  await invokeAdminUsers({ action: "delete", id });
+}

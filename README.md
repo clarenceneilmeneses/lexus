@@ -12,9 +12,11 @@ src/
   hooks/      useAuth (session + admin role), useCatalog
   components/ layout (Header/Footer/PublicLayout), ProductCard
   pages/      Home, Products, ProductDetail, Services, About, Contact, NotFound
-  pages/admin AdminApp (auth gate + tabs), Login, Products/Categories/Inquiries/Content panels
+  pages/admin AdminApp (auth gate + tabs), Login, Products/Categories/Inquiries/Content/Users/Settings panels
 supabase/
-  schema.sql  tables, role-based RLS, storage policies, search, seed data
+  schema.sql              tables, role-based RLS, storage policies, search, seed data
+  migrations/0001_rbac.sql 3-tier role model (admin / editor / viewer)
+  functions/admin-users   Edge Function: create/delete login accounts (service_role, admin-gated)
 ```
 
 ---
@@ -65,7 +67,31 @@ VITE_SUPABASE_ANON_KEY=sb_publishable_xxxxxxxx
 3. Recommended: Authentication → Providers → Email → turn **off** public sign-ups so
    only invited staff can ever exist.
 
-### 5. Run
+### 5. Enable in-app account creation (Users tab)
+
+The admin **Users** tab can create and delete real login accounts. Because that needs
+the `service_role` key (which must never reach the browser), it runs through a secure
+Supabase **Edge Function** that re-checks the caller is an admin. Deploy it once:
+
+```bash
+npm install --save-dev supabase       # the CLI, as a dev dependency
+npx supabase login                    # opens a browser to authorize
+npx supabase link --project-ref apyeuocfloljuzywofqr
+npx supabase functions deploy admin-users
+```
+
+No secrets to set: Supabase **auto-injects** `SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY` into every Edge Function (the `SUPABASE_` prefix is
+reserved, so you can't set them yourself). Deploying does **not** require Docker.
+
+Prefer no CLI? In the Supabase Dashboard: **Edge Functions → Deploy a new function**,
+name it `admin-users`, paste the contents of `supabase/functions/admin-users/index.ts`,
+and **Deploy**.
+
+Until this is deployed, the Users tab still lists users and changes roles, but
+**+ New account** / **Delete** will report that the function isn't reachable.
+
+### 6. Run
 ```bash
 npm run dev      # http://localhost:5173  (admin at /admin)
 npm run build    # type-check + production build into dist/

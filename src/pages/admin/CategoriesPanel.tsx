@@ -1,26 +1,63 @@
 import { useMemo, useState } from "react";
-import type { Catalog } from "../../lib/types";
+import type { Catalog, Category } from "../../lib/types";
 import { deleteCategory, saveCategory } from "../../lib/api";
 import { slugify } from "../../lib/utils";
+import Pagination from "../../components/Pagination";
+import { usePagination } from "../../hooks/usePagination";
+
+type Draft = { name: string; slug: string; description: string };
+const emptyDraft: Draft = { name: "", slug: "", description: "" };
 
 export default function CategoriesPanel({ catalog, reload, canWrite }: { catalog: Catalog; reload: () => void; canWrite: boolean }) {
-  const [name, setName] = useState("");
-  const [desc, setDesc] = useState("");
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  // null = adding (form at bottom); a Category = editing that row inline.
+  const [editing, setEditing] = useState<Category | null>(null);
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
 
   const list = useMemo(() => {
     const t = q.trim().toLowerCase();
     return catalog.categories.filter((c) => !t || c.name.toLowerCase().includes(t) || c.slug.includes(t));
   }, [catalog.categories, q]);
 
-  async function add() {
-    if (!name) return;
-    setBusy(true);
+  const { page, setPage, totalPages, pageItems, total, from, to } = usePagination(list, 10, q);
+
+  function startAdd() { setEditing(null); setDraft(emptyDraft); setErr(""); }
+  function startEdit(c: Category) {
+    setEditing(c);
+    setDraft({ name: c.name, slug: c.slug, description: c.description ?? "" });
+    setErr("");
+  }
+  function cancel() { setEditing(null); setDraft(emptyDraft); setErr(""); }
+
+  async function save() {
+    const name = draft.name.trim();
+    if (!name) { setErr("Name is required."); return; }
+    setBusy(true); setErr("");
     try {
-      await saveCategory({ name, slug: slugify(name), description: desc, sort_order: catalog.categories.length + 1 });
-      setName(""); setDesc(""); reload();
+      await saveCategory(
+        {
+          name,
+          slug: (draft.slug.trim() || slugify(name)),
+          description: draft.description.trim(),
+          sort_order: editing ? editing.sort_order : catalog.categories.length + 1,
+        },
+        editing?.id
+      );
+      cancel();
+      reload();
+    } catch (e: any) {
+      setErr(e?.message ?? "Could not save category.");
     } finally { setBusy(false); }
+  }
+
+  async function del(c: Category) {
+    if (!confirm(`Delete category "${c.name}"? Products keep existing but lose this category.`)) return;
+    setBusy(true); setErr("");
+    try { await deleteCategory(c.id); if (editing?.id === c.id) cancel(); reload(); }
+    catch (e: any) { setErr(e?.message ?? "Could not delete category."); }
+    finally { setBusy(false); }
   }
 
   return (
@@ -30,35 +67,55 @@ export default function CategoriesPanel({ catalog, reload, canWrite }: { catalog
         <input className="input max-w-[260px]" placeholder="Search categories…" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
 
+      {err && <div className="bg-[#FDECEA] border border-[#F5C2BA] text-[#B23120] px-3.5 py-3 rounded text-[13.5px] mb-4">{err}</div>}
+
       <div className="panel mb-4.5">
-        {list.map((c) => (
-          <div key={c.id} className="flex items-center gap-3.5 py-3 border-b border-line-2 last:border-0">
-            <div className="flex-1">
-              <b>{c.name}</b>
-              <div className="font-mono text-[12px] text-steel">/{c.slug} · {catalog.products.filter((p) => p.category_id === c.id).length} products</div>
-            </div>
-            {canWrite ? (
-              <button className="btn btn-sm bg-[#FCE9E9] text-[#B23030]"
-                onClick={async () => { if (confirm(`Delete category "${c.name}"? Products keep existing but lose this category.`)) { await deleteCategory(c.id); reload(); } }}>
-                Delete
-              </button>
+        {pageItems.map((c) => (
+          <div key={c.id} className="py-3 border-b border-line-2 last:border-0">
+            {editing?.id === c.id ? (
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div><label className="field-label">Name</label><input className="input" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></div>
+                <div><label className="field-label">Slug</label><input className="input" value={draft.slug} placeholder={slugify(draft.name)} onChange={(e) => setDraft({ ...draft, slug: e.target.value })} /></div>
+                <div className="sm:col-span-2"><label className="field-label">Description</label><input className="input" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} /></div>
+                <div className="sm:col-span-2 flex gap-2">
+                  <button className="btn btn-primary btn-sm" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save changes"}</button>
+                  <button className="btn btn-ghost btn-sm" onClick={cancel} disabled={busy}>Cancel</button>
+                </div>
+              </div>
             ) : (
-              <span className="font-mono text-[11px] text-steel">read-only</span>
+              <div className="flex items-center gap-3.5">
+                <div className="flex-1 min-w-0">
+                  <b>{c.name}</b>
+                  <div className="font-mono text-[12px] text-steel">/{c.slug} · {catalog.products.filter((p) => p.category_id === c.id).length} products</div>
+                </div>
+                {canWrite ? (
+                  <>
+                    <button className="btn btn-ghost btn-sm" onClick={() => startEdit(c)}>Edit</button>
+                    <button className="btn btn-sm bg-[#FCE9E9] text-[#B23030]" disabled={busy} onClick={() => del(c)}>Delete</button>
+                  </>
+                ) : (
+                  <span className="font-mono text-[11px] text-steel">read-only</span>
+                )}
+              </div>
             )}
           </div>
         ))}
         {!list.length && <p className="text-steel">{q ? "No categories match." : "No categories yet."}</p>}
+        <Pagination page={page} totalPages={totalPages} onPage={setPage} from={from} to={to} total={total} />
       </div>
 
-      {canWrite && (
+      {canWrite && !editing && (
         <div className="panel">
           <h3 className="text-base mb-3">Add category</h3>
           <div className="grid sm:grid-cols-2 gap-3">
-            <div><label className="field-label">Name</label><input className="input" value={name} onChange={(e) => setName(e.target.value)} /></div>
-            <div><label className="field-label">Description</label><input className="input" value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
+            <div><label className="field-label">Name</label><input className="input" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></div>
+            <div><label className="field-label">Description</label><input className="input" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} /></div>
           </div>
-          <button className="btn btn-primary btn-sm mt-3.5" onClick={add} disabled={busy}>+ Add category</button>
+          <button className="btn btn-primary btn-sm mt-3.5" onClick={save} disabled={busy}>{busy ? "Adding…" : "+ Add category"}</button>
         </div>
+      )}
+      {canWrite && editing && (
+        <p className="text-steel text-[13px]"><button className="underline" onClick={startAdd}>Cancel edit</button> to add a new category instead.</p>
       )}
     </div>
   );

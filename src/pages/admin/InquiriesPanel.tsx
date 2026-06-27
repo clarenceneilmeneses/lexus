@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { Inquiry } from "../../lib/types";
 import { deleteInquiry, fetchInquiries, setInquiryStatus } from "../../lib/api";
 import { cn } from "../../lib/utils";
+import Pagination from "../../components/Pagination";
+import { usePagination } from "../../hooks/usePagination";
 
 const PILL: Record<Inquiry["status"], string> = {
   new: "bg-accent-soft text-accent-d",
@@ -26,6 +28,8 @@ export default function InquiriesPanel({ canWrite, canDelete }: { canWrite: bool
     );
   }, [rows, q, filter]);
 
+  const { page, setPage, totalPages, pageItems, total, from, to } = usePagination(filtered, 10, `${q}|${filter}`);
+
   if (rows === null) return <p className="font-mono text-steel">Loading inquiries…</p>;
   const newCount = rows.filter((r) => r.status === "new").length;
 
@@ -46,7 +50,7 @@ export default function InquiriesPanel({ canWrite, canDelete }: { canWrite: bool
 
       {!filtered.length && <div className="panel"><p className="text-steel">{rows.length ? "No inquiries match." : "No inquiries yet. Messages from the contact form land here."}</p></div>}
       <div className="space-y-3">
-        {filtered.map((r) => (
+        {pageItems.map((r) => (
           <div key={r.id} className="panel py-4">
             <div className="flex justify-between items-start gap-3 flex-wrap">
               <div>
@@ -68,6 +72,8 @@ export default function InquiriesPanel({ canWrite, canDelete }: { canWrite: bool
           </div>
         ))}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} from={from} to={to} total={total} />
     </div>
   );
 }

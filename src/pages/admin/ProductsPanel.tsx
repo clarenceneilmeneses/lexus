@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import type { Catalog, Product } from "../../lib/types";
 import { deleteProduct } from "../../lib/api";
 import { cn, primaryImage } from "../../lib/utils";
+import Pagination from "../../components/Pagination";
+import { usePagination } from "../../hooks/usePagination";
 import ProductForm from "./ProductForm";
 
 type SortKey = "order" | "name" | "newest";
@@ -26,6 +28,8 @@ export default function ProductsPanel({ catalog, reload, canWrite }: { catalog: 
     );
     return rows;
   }, [catalog.products, catalog.categories, q, sort]);
+
+  const { page, setPage, totalPages, pageItems, total, from, to } = usePagination(list, 12, `${q}|${sort}`);
 
   if (editing) {
     return (
@@ -61,7 +65,7 @@ export default function ProductsPanel({ catalog, reload, canWrite }: { catalog: 
       </div>
 
       <div className="panel">
-        {list.map((p) => (
+        {pageItems.map((p) => (
           <div key={p.id} className="flex items-center gap-3.5 py-3 border-b border-line-2 last:border-0">
             <img className="w-[54px] h-[42px] rounded-sm object-cover flex-none" src={primaryImage(p)} alt="" />
             <div className="flex-1 min-w-0">
@@ -84,6 +88,8 @@ export default function ProductsPanel({ catalog, reload, canWrite }: { catalog: 
         ))}
         {!list.length && <p className="text-steel">{q ? "No products match your search." : "No products yet."}</p>}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} from={from} to={to} total={total} />
     </div>
   );
 }

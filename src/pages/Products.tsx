@@ -3,6 +3,8 @@ import { Link, useOutletContext, useSearchParams } from "react-router-dom";
 import type { Catalog } from "../lib/types";
 import ProductCard from "../components/ProductCard";
 import PageHeader from "../components/PageHeader";
+import Pagination from "../components/Pagination";
+import { usePagination } from "../hooks/usePagination";
 import { cn } from "../lib/utils";
 
 export default function Products() {
@@ -22,6 +24,8 @@ export default function Products() {
 
   const setCat = (slug: string) => setParams(slug === "all" ? {} : { cat: slug });
   const catName = catalog.categories.find((c) => c.slug === cat)?.name;
+
+  const { page, setPage, totalPages, pageItems } = usePagination(filtered, 12, `${q}|${cat}`);
 
   return (
     <>
@@ -80,9 +84,12 @@ export default function Products() {
           </p>
 
           {filtered.length ? (
-            <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(258px,1fr))" }}>
-              {filtered.map((p) => <ProductCard key={p.id} p={p} />)}
-            </div>
+            <>
+              <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(258px,1fr))" }}>
+                {pageItems.map((p) => <ProductCard key={p.id} p={p} />)}
+              </div>
+              <Pagination page={page} totalPages={totalPages} onPage={setPage} />
+            </>
           ) : (
             <div className="bg-white border border-line rounded-3xl text-center py-16">
               <h3 className="text-xl font-semibold tracking-tight mb-1.5">No matches</h3>

@@ -1,0 +1,41 @@
+name: Supabase keep-alive
+
+# Free Supabase projects pause after 7 days of no activity. This makes a tiny
+# read request on a schedule so the project always counts as "active".
+#
+# One-time setup — add two repo secrets under
+#   GitHub repo → Settings → Secrets and variables → Actions → New repository secret
+#     SUPABASE_URL       = https://apyeuocfloljuzywofqr.supabase.co
+#     SUPABASE_ANON_KEY  = your publishable / anon key (the VITE_SUPABASE_ANON_KEY value)
+#
+# Note: GitHub disables scheduled workflows after 60 days with no repo commits.
+# Any push (or clicking "Run workflow") re-enables it.
+
+on:
+  schedule:
+    - cron: "17 3 * * *" # daily, ~03:17 UTC (off the hour to avoid GitHub's busy-time delays)
+  workflow_dispatch: {} # lets you run it manually from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Missing SUPABASE_URL or SUPABASE_ANON_KEY repo secret."
+            exit 1
+          fi
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/categories?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+          echo "Supabase responded with HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "::error::Keep-alive ping failed (HTTP $code)."
+            exit 1
+          fi
+          echo "Keep-alive ping OK."
