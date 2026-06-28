@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Branch, Catalog, ContactSettings, SeoSettings, SocialSettings } from "../../lib/types";
 import { saveSettings } from "../../lib/api";
+import { StatCard, StatRow } from "../../components/StatCard";
 
 export default function SettingsPanel({ catalog, reload }: { catalog: Catalog; reload: () => void }) {
   const s = catalog.settings;
@@ -43,6 +44,13 @@ export default function SettingsPanel({ catalog, reload }: { catalog: Catalog; r
         <h2 className="text-[22px]">Site settings</h2>
         <button className="btn btn-primary btn-sm" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save settings"}</button>
       </div>
+
+      <StatRow>
+        <StatCard label="Branches" value={branches.filter((b) => b.city.trim() || b.address.trim()).length} />
+        <StatCard label="Social links" value={[social.facebook, social.instagram, social.linkedin].filter((x) => x?.trim()).length} tone="steel" />
+        <StatCard label="SEO" value={(seo.title?.trim() || seo.description?.trim()) ? "Set" : "—"} tone={(seo.title?.trim() || seo.description?.trim()) ? "green" : "orange"} />
+      </StatRow>
+
       {msg && <div className="bg-[#E8F7EF] border border-[#BFE6CF] text-[#137A43] px-3.5 py-3 rounded text-[13.5px] mb-4">{msg}</div>}
 
       {/* Branches */}

@@ -4,6 +4,7 @@ import { deleteInquiry, fetchInquiries, setInquiryStatus } from "../../lib/api";
 import { cn } from "../../lib/utils";
 import Pagination from "../../components/Pagination";
 import { usePagination } from "../../hooks/usePagination";
+import { StatCard, StatRow } from "../../components/StatCard";
 
 const PILL: Record<Inquiry["status"], string> = {
   new: "bg-accent-soft text-accent-d",
@@ -32,6 +33,8 @@ export default function InquiriesPanel({ canWrite, canDelete }: { canWrite: bool
 
   if (rows === null) return <p className="font-mono text-steel">Loading inquiries…</p>;
   const newCount = rows.filter((r) => r.status === "new").length;
+  const readCount = rows.filter((r) => r.status === "read").length;
+  const archivedCount = rows.filter((r) => r.status === "archived").length;
 
   return (
     <div>
@@ -47,6 +50,13 @@ export default function InquiriesPanel({ canWrite, canDelete }: { canWrite: bool
           </select>
         </div>
       </div>
+
+      <StatRow>
+        <StatCard label="Total" value={rows.length} />
+        <StatCard label="New" value={newCount} tone="orange" />
+        <StatCard label="Read" value={readCount} tone="navy" />
+        <StatCard label="Archived" value={archivedCount} tone="steel" />
+      </StatRow>
 
       {!filtered.length && <div className="panel"><p className="text-steel">{rows.length ? "No inquiries match." : "No inquiries yet. Messages from the contact form land here."}</p></div>}
       <div className="space-y-3">

@@ -4,6 +4,7 @@ import { deleteProduct } from "../../lib/api";
 import { cn, primaryImage } from "../../lib/utils";
 import Pagination from "../../components/Pagination";
 import { usePagination } from "../../hooks/usePagination";
+import { StatCard, StatRow } from "../../components/StatCard";
 import ProductForm from "./ProductForm";
 
 type SortKey = "order" | "name" | "newest";
@@ -15,6 +16,10 @@ export default function ProductsPanel({ catalog, reload, canWrite }: { catalog: 
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const catName = (id: string | null) => catalog.categories.find((c) => c.id === id)?.name ?? "Uncategorized";
+
+  const live = catalog.products.filter((p) => p.is_published).length;
+  const hidden = catalog.products.length - live;
+  const featured = catalog.products.filter((p) => p.is_featured).length;
 
   const list = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -54,6 +59,13 @@ export default function ProductsPanel({ catalog, reload, canWrite }: { catalog: 
         <h2 className="text-[22px]">Products <span className="text-steel text-[15px]">({list.length})</span></h2>
         {canWrite && <button className="btn btn-primary btn-sm" onClick={() => setEditing("new")}>+ New product</button>}
       </div>
+
+      <StatRow>
+        <StatCard label="Total products" value={catalog.products.length} />
+        <StatCard label="Live" value={live} tone="green" />
+        <StatCard label="Hidden" value={hidden} tone="steel" />
+        <StatCard label="Featured" value={featured} tone="orange" />
+      </StatRow>
 
       <div className="flex gap-2 flex-wrap mb-4">
         <input className="input max-w-[280px]" placeholder="Search name, model, category…" value={q} onChange={(e) => setQ(e.target.value)} />

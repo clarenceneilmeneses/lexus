@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Catalog } from "../../lib/types";
 import { saveSettings } from "../../lib/api";
+import { StatCard, StatRow } from "../../components/StatCard";
 
 export default function ContentPanel({ catalog, reload, canWrite }: { catalog: Catalog; reload: () => void; canWrite: boolean }) {
   const s = catalog.settings;
@@ -37,8 +38,16 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
         <h2 className="text-[22px]">Website content</h2>
         {canWrite && <button className="btn btn-primary btn-sm" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save changes"}</button>}
       </div>
+
+      <StatRow>
+        <StatCard label="Services listed" value={services.items.length} />
+        <StatCard label="About highlights" value={about.stats.length} tone="steel" />
+        <StatCard label="Contact email" value={contact.email?.trim() ? "Set" : "—"} tone={contact.email?.trim() ? "green" : "orange"} />
+      </StatRow>
+
       {!canWrite && <div className="bg-line-2 text-steel px-3.5 py-3 rounded text-[13.5px] mb-3.5">Read-only — your role can't edit content.</div>}
       {msg && <div className="bg-[#E8F7EF] border border-[#B6E6CB] text-[#137A43] px-3.5 py-3 rounded text-[13.5px] mb-3.5">{msg}</div>}
+      <p className="text-steel text-[13px] mb-4">Edit the text shown across the public site, then <b>Save changes</b>. Sections below: Hero · About · Services · Contact.</p>
 
       <div className="panel mb-4.5">
         <h3 className="text-base mb-3">Homepage hero</h3>

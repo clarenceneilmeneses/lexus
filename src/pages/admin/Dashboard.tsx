@@ -2,23 +2,9 @@ import { useEffect, useState } from "react";
 import type { Catalog, Inquiry } from "../../lib/types";
 import { fetchInquiries } from "../../lib/api";
 import { cn } from "../../lib/utils";
+import { StatCard, StatRow } from "../../components/StatCard";
 
 type Nav = "products" | "categories" | "inquiries" | "content";
-
-function Stat({ label, value, tone = "navy" }: { label: string; value: number | string; tone?: "navy" | "orange" | "green" | "steel" }) {
-  const tones = {
-    navy: "text-corp-navy",
-    orange: "text-corp-orange",
-    green: "text-[#137A43]",
-    steel: "text-steel",
-  } as const;
-  return (
-    <div className="panel">
-      <div className={cn("font-display font-black text-[34px] leading-none", tones[tone])}>{value}</div>
-      <div className="font-mono text-[11px] tracking-[0.1em] uppercase text-steel mt-2">{label}</div>
-    </div>
-  );
-}
 
 export default function Dashboard({ catalog, go }: { catalog: Catalog; go: (tab: Nav) => void }) {
   const [inquiries, setInquiries] = useState<Inquiry[] | null>(null);
@@ -33,12 +19,12 @@ export default function Dashboard({ catalog, go }: { catalog: Catalog; go: (tab:
     <div>
       <h2 className="text-[22px] mb-4">Dashboard</h2>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <Stat label="Products" value={catalog.products.length} />
-        <Stat label="Live products" value={live} tone="green" />
-        <Stat label="Categories" value={catalog.categories.length} tone="steel" />
-        <Stat label="New inquiries" value={inquiries === null ? "…" : newInq} tone="orange" />
-      </div>
+      <StatRow>
+        <StatCard label="Products" value={catalog.products.length} />
+        <StatCard label="Live products" value={live} tone="green" />
+        <StatCard label="Categories" value={catalog.categories.length} tone="steel" />
+        <StatCard label="New inquiries" value={inquiries === null ? "…" : newInq} tone="orange" />
+      </StatRow>
 
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         {/* Recent inquiries */}

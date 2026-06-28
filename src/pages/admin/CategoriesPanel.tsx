@@ -4,6 +4,7 @@ import { deleteCategory, saveCategory } from "../../lib/api";
 import { slugify } from "../../lib/utils";
 import Pagination from "../../components/Pagination";
 import { usePagination } from "../../hooks/usePagination";
+import { StatCard, StatRow } from "../../components/StatCard";
 
 type Draft = { name: string; slug: string; description: string };
 const emptyDraft: Draft = { name: "", slug: "", description: "" };
@@ -12,8 +13,8 @@ export default function CategoriesPanel({ catalog, reload, canWrite }: { catalog
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  // null = adding (form at bottom); a Category = editing that row inline.
-  const [editing, setEditing] = useState<Category | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<Category | null>(null); // inline row edit
   const [draft, setDraft] = useState<Draft>(emptyDraft);
 
   const list = useMemo(() => {
@@ -23,13 +24,18 @@ export default function CategoriesPanel({ catalog, reload, canWrite }: { catalog
 
   const { page, setPage, totalPages, pageItems, total, from, to } = usePagination(list, 10, q);
 
-  function startAdd() { setEditing(null); setDraft(emptyDraft); setErr(""); }
+  const catIds = new Set(catalog.categories.map((c) => c.id));
+  const uncategorized = catalog.products.filter((p) => !p.category_id || !catIds.has(p.category_id)).length;
+  const categorized = catalog.products.length - uncategorized;
+
+  function startAdd() { setEditing(null); setAdding(true); setDraft(emptyDraft); setErr(""); }
   function startEdit(c: Category) {
+    setAdding(false);
     setEditing(c);
     setDraft({ name: c.name, slug: c.slug, description: c.description ?? "" });
     setErr("");
   }
-  function cancel() { setEditing(null); setDraft(emptyDraft); setErr(""); }
+  function cancel() { setEditing(null); setAdding(false); setDraft(emptyDraft); setErr(""); }
 
   async function save() {
     const name = draft.name.trim();
@@ -64,10 +70,40 @@ export default function CategoriesPanel({ catalog, reload, canWrite }: { catalog
     <div>
       <div className="flex justify-between items-center gap-3 flex-wrap mb-4">
         <h2 className="text-[22px]">Categories <span className="text-steel text-[15px]">({list.length})</span></h2>
-        <input className="input max-w-[260px]" placeholder="Search categories…" value={q} onChange={(e) => setQ(e.target.value)} />
+        {canWrite && (
+          <button className="btn btn-primary btn-sm" onClick={() => (adding ? cancel() : startAdd())}>
+            {adding ? "Close" : "+ New category"}
+          </button>
+        )}
       </div>
 
+      <StatRow>
+        <StatCard label="Categories" value={catalog.categories.length} />
+        <StatCard label="Categorized products" value={categorized} tone="green" />
+        <StatCard label="Uncategorized" value={uncategorized} tone={uncategorized ? "orange" : "steel"} />
+      </StatRow>
+
       {err && <div className="bg-[#FDECEA] border border-[#F5C2BA] text-[#B23120] px-3.5 py-3 rounded text-[13.5px] mb-4">{err}</div>}
+
+      {/* Add form — appears at the top, right where the New button is */}
+      {canWrite && adding && (
+        <div className="panel mb-4.5 border-corp-soft">
+          <h3 className="text-base mb-3">New category</h3>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div><label className="field-label">Name</label><input className="input" autoFocus value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></div>
+            <div><label className="field-label">Slug</label><input className="input" value={draft.slug} placeholder={slugify(draft.name)} onChange={(e) => setDraft({ ...draft, slug: e.target.value })} /></div>
+            <div className="sm:col-span-2"><label className="field-label">Description</label><input className="input" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} /></div>
+          </div>
+          <div className="flex gap-2 mt-3.5">
+            <button className="btn btn-primary btn-sm" onClick={save} disabled={busy}>{busy ? "Adding…" : "+ Add category"}</button>
+            <button className="btn btn-ghost btn-sm" onClick={cancel} disabled={busy}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-2 flex-wrap mb-4">
+        <input className="input max-w-[280px]" placeholder="Search categories…" value={q} onChange={(e) => setQ(e.target.value)} />
+      </div>
 
       <div className="panel mb-4.5">
         {pageItems.map((c) => (
@@ -100,23 +136,9 @@ export default function CategoriesPanel({ catalog, reload, canWrite }: { catalog
             )}
           </div>
         ))}
-        {!list.length && <p className="text-steel">{q ? "No categories match." : "No categories yet."}</p>}
+        {!list.length && <p className="text-steel">{q ? "No categories match." : "No categories yet — add your first with “+ New category”."}</p>}
         <Pagination page={page} totalPages={totalPages} onPage={setPage} from={from} to={to} total={total} />
       </div>
-
-      {canWrite && !editing && (
-        <div className="panel">
-          <h3 className="text-base mb-3">Add category</h3>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <div><label className="field-label">Name</label><input className="input" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></div>
-            <div><label className="field-label">Description</label><input className="input" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} /></div>
-          </div>
-          <button className="btn btn-primary btn-sm mt-3.5" onClick={save} disabled={busy}>{busy ? "Adding…" : "+ Add category"}</button>
-        </div>
-      )}
-      {canWrite && editing && (
-        <p className="text-steel text-[13px]"><button className="underline" onClick={startAdd}>Cancel edit</button> to add a new category instead.</p>
-      )}
     </div>
   );
 }

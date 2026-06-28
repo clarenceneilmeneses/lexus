@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { cn } from "../../lib/utils";
 import Pagination from "../../components/Pagination";
 import { usePagination } from "../../hooks/usePagination";
+import { StatCard, StatRow } from "../../components/StatCard";
 
 const ROLES: Role[] = ["viewer", "editor", "admin"];
 const ROLE_PILL: Record<Role, string> = {
@@ -93,6 +94,13 @@ export default function UsersPanel() {
           </button>
         </div>
       </div>
+
+      <StatRow>
+        <StatCard label="Total users" value={rows?.length ?? "…"} />
+        <StatCard label="Admins" value={(rows ?? []).filter((r) => r.role === "admin").length} tone="navy" />
+        <StatCard label="Editors" value={(rows ?? []).filter((r) => r.role === "editor").length} tone="green" />
+        <StatCard label="Viewers" value={(rows ?? []).filter((r) => r.role === "viewer").length} tone="steel" />
+      </StatRow>
 
       {showNew && (
         <div className="panel mb-4">
