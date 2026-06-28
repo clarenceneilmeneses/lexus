@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Catalog, Category, Inquiry, Product, ProductImage, Profile, Role, SiteSettings, Spec } from "./types";
+import type { AuditEntry, Catalog, Category, Inquiry, Product, ProductImage, Profile, Role, SiteSettings, Spec } from "./types";
 
 const DEFAULT_SETTINGS: SiteSettings = {
   hero: {
@@ -146,6 +146,27 @@ export async function setPrimaryImage(im: ProductImage): Promise<void> {
   if (error) throw error;
 }
 
+/**
+ * Upload an image used in editable site content (e.g. service cards) and return
+ * its storage path. Reuses the public `product-images` bucket — resolve the
+ * public URL with `imgUrl(path)`. `folder` namespaces the file (default "site").
+ */
+export async function uploadSiteImage(file: File, folder = "site"): Promise<string> {
+  if (file.size > 5 * 1024 * 1024) throw new Error("Image is larger than 5 MB.");
+  if (!file.type.startsWith("image/")) throw new Error("Only image files are allowed.");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const path = `${folder}/${crypto.randomUUID()}.${ext}`;
+  const up = await supabase.storage.from("product-images").upload(path, file, { contentType: file.type });
+  if (up.error) throw up.error;
+  return path;
+}
+
+/** Best-effort delete of site images from storage (e.g. orphaned service images). */
+export async function deleteSiteImages(paths: string[]): Promise<void> {
+  if (!paths.length) return;
+  await supabase.storage.from("product-images").remove(paths);
+}
+
 // ---------- Admin: categories ----------
 export async function saveCategory(input: { name: string; slug: string; description: string; sort_order: number }, id?: string) {
   const q = id
@@ -181,6 +202,17 @@ export async function deleteInquiry(id: string): Promise<void> {
 export async function saveSettings(entries: { key: string; value: unknown }[]): Promise<void> {
   const { error } = await supabase.from("site_settings").upsert(entries.map((e) => ({ key: e.key, value: e.value })));
   if (error) throw error;
+}
+
+// ---------- Admin: audit log (admin-only; enforced by RLS) ----------
+export async function fetchAuditLog(limit = 500): Promise<AuditEntry[]> {
+  const { data, error } = await supabase
+    .from("audit_log")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as AuditEntry[];
 }
 
 // ---------- Admin: users & roles (admin-only; enforced by RLS) ----------

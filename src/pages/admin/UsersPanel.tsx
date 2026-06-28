@@ -87,12 +87,9 @@ export default function UsersPanel() {
     <div>
       <div className="flex justify-between items-center gap-3 flex-wrap mb-4">
         <h2 className="text-[22px]">Users &amp; roles <span className="text-steel text-[15px]">({rows?.length ?? 0})</span></h2>
-        <div className="flex gap-2 flex-wrap">
-          <input className="input max-w-[240px]" placeholder="Search email or role…" value={q} onChange={(e) => setQ(e.target.value)} />
-          <button className="btn btn-primary btn-sm" onClick={() => { setShowNew((v) => !v); setErr(""); }}>
-            {showNew ? "Close" : "+ New account"}
-          </button>
-        </div>
+        <button className="btn btn-primary btn-sm" onClick={() => { setShowNew((v) => !v); setErr(""); }}>
+          {showNew ? "Close" : "+ New account"}
+        </button>
       </div>
 
       <StatRow>
@@ -128,12 +125,17 @@ export default function UsersPanel() {
       <div className="panel bg-corp-soft/30 border-corp-soft mb-4">
         <p className="text-[13.5px] text-corp-navy">
           <b>Roles:</b> <b>admin</b> (full access incl. users &amp; settings), <b>editor</b> (manage products,
-          categories, inquiries, content), <b>viewer</b> (read-only). You can't change or delete your own account here.
+          categories, inquiries, content), <b>viewer</b> (read-only). You can delete or change other users' accounts, but not your own.
         </p>
       </div>
 
       {err && <div className="bg-[#FDECEA] border border-[#F5C2BA] text-[#B23120] px-3.5 py-3 rounded text-[13.5px] mb-4">{err}</div>}
       {msg && <div className="bg-[#E8F7EF] border border-[#B6E6CB] text-[#137A43] px-3.5 py-3 rounded text-[13.5px] mb-4">{msg}</div>}
+
+      <div className="flex gap-2 flex-wrap mb-4">
+        <input className="input max-w-[280px]" placeholder="Search email or role…" value={q} onChange={(e) => setQ(e.target.value)} />
+        {q && <button className="btn btn-ghost btn-sm" onClick={() => setQ("")}>Clear</button>}
+      </div>
 
       <div className="panel">
         {rows === null ? (

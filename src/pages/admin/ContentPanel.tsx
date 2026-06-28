@@ -1,7 +1,11 @@
-import { useState } from "react";
-import type { Catalog } from "../../lib/types";
-import { saveSettings } from "../../lib/api";
+import { useRef, useState } from "react";
+import type { Catalog, ServiceItem } from "../../lib/types";
+import { deleteSiteImages, saveSettings, uploadSiteImage } from "../../lib/api";
+import { imgUrl } from "../../lib/utils";
 import { StatCard, StatRow } from "../../components/StatCard";
+
+const serviceImages = (items: ServiceItem[]) =>
+  items.map((it) => it.image).filter((p): p is string => !!p);
 
 export default function ContentPanel({ catalog, reload, canWrite }: { catalog: Catalog; reload: () => void; canWrite: boolean }) {
   const s = catalog.settings;
@@ -10,24 +14,55 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
   const [contact, setContact] = useState(s.contact);
   const [services, setServices] = useState(s.services);
   const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+  const [imgBusy, setImgBusy] = useState<number | null>(null);
+
+  // Image paths currently persisted in the DB, and every path uploaded this
+  // session — used at save time to delete whatever ends up unreferenced.
+  const persistedImages = useRef<Set<string>>(new Set(serviceImages(s.services.items)));
+  const uploadedImages = useRef<Set<string>>(new Set());
 
   const setItem = (i: number, k: "title" | "body", v: string) =>
     setServices((sv) => ({ ...sv, items: sv.items.map((it, j) => (j === i ? { ...it, [k]: v } : it)) }));
+  const setImage = (i: number, path: string | null) =>
+    setServices((sv) => ({ ...sv, items: sv.items.map((it, j) => (j === i ? { ...it, image: path } : it)) }));
   const addItem = () =>
     setServices((sv) => ({ ...sv, items: [...sv.items, { title: "", body: "" }] }));
   const removeItem = (i: number) =>
     setServices((sv) => ({ ...sv, items: sv.items.filter((_, j) => j !== i) }));
 
-  async function save() {
-    setBusy(true);
+  async function uploadImage(i: number, file: File | undefined) {
+    if (!file) return;
+    setErr(""); setImgBusy(i);
     try {
+      const path = await uploadSiteImage(file, "services");
+      uploadedImages.current.add(path);
+      setImage(i, path);
+    } catch (e: any) {
+      setErr(e?.message ?? "Image upload failed.");
+    } finally { setImgBusy(null); }
+  }
+
+  async function save() {
+    setBusy(true); setErr("");
+    try {
+      const items = services.items.filter((it) => it.title.trim() || it.body.trim());
       await saveSettings([
         { key: "hero", value: hero },
         { key: "about", value: about },
         { key: "contact", value: contact },
-        { key: "services", value: { ...services, items: services.items.filter((it) => it.title.trim() || it.body.trim()) } },
+        { key: "services", value: { ...services, items } },
       ]);
+
+      // Reconcile storage: delete any previously-persisted or this-session-uploaded
+      // image that the saved content no longer references.
+      const kept = new Set(serviceImages(items));
+      const orphans = [...persistedImages.current, ...uploadedImages.current].filter((p) => !kept.has(p));
+      if (orphans.length) await deleteSiteImages([...new Set(orphans)]).catch(() => { /* best effort */ });
+      persistedImages.current = kept;
+      uploadedImages.current = new Set();
+
       setMsg("Saved."); reload(); setTimeout(() => setMsg(""), 2500);
     } finally { setBusy(false); }
   }
@@ -47,6 +82,7 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
 
       {!canWrite && <div className="bg-line-2 text-steel px-3.5 py-3 rounded text-[13.5px] mb-3.5">Read-only — your role can't edit content.</div>}
       {msg && <div className="bg-[#E8F7EF] border border-[#B6E6CB] text-[#137A43] px-3.5 py-3 rounded text-[13.5px] mb-3.5">{msg}</div>}
+      {err && <div className="bg-[#FDECEA] border border-[#F5C2BA] text-[#B23120] px-3.5 py-3 rounded text-[13.5px] mb-3.5">{err}</div>}
       <p className="text-steel text-[13px] mb-4">Edit the text shown across the public site, then <b>Save changes</b>. Sections below: Hero · About · Services · Contact.</p>
 
       <div className="panel mb-4.5">
@@ -70,15 +106,39 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
         <div className="mb-4"><label className="field-label">Section title</label><input className="input" value={services.title} onChange={(e) => setServices({ ...services, title: e.target.value })} /></div>
         <div className="space-y-4">
           {services.items.map((it, i) => (
-            <div key={i} className="grid sm:grid-cols-[1fr_2fr_auto] gap-3 pb-4 border-b border-line-2 last:border-0 last:pb-0">
-              <div><label className="field-label">Title</label><input className="input" value={it.title} onChange={(e) => setItem(i, "title", e.target.value)} /></div>
-              <div><label className="field-label">Description</label><textarea className="input min-h-[64px]" value={it.body} onChange={(e) => setItem(i, "body", e.target.value)} /></div>
-              {canWrite && <div className="flex items-end"><button className="btn btn-sm bg-[#FCE9E9] text-[#B23030]" onClick={() => removeItem(i)}>Remove</button></div>}
+            <div key={i} className="grid sm:grid-cols-[140px_1fr] gap-3.5 pb-4 border-b border-line-2 last:border-0 last:pb-0">
+              {/* Image control */}
+              <div>
+                <label className="field-label">Card image</label>
+                <div className="aspect-[4/3] rounded-lg overflow-hidden border border-line-2 bg-line-2/50 grid place-items-center">
+                  {it.image ? (
+                    <img src={imgUrl(it.image)!} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="font-mono text-[10.5px] uppercase tracking-wide text-steel text-center px-2">Default photo</span>
+                  )}
+                </div>
+                {canWrite && (
+                  <div className="flex gap-2 mt-1.5">
+                    <label className="btn btn-ghost btn-sm cursor-pointer">
+                      {imgBusy === i ? "Uploading…" : it.image ? "Replace" : "Upload"}
+                      <input type="file" accept="image/*" className="hidden" disabled={imgBusy === i}
+                        onChange={(e) => { uploadImage(i, e.target.files?.[0]); e.target.value = ""; }} />
+                    </label>
+                    {it.image && <button className="btn btn-ghost btn-sm" onClick={() => setImage(i, null)}>Reset</button>}
+                  </div>
+                )}
+              </div>
+              {/* Text fields */}
+              <div className="grid gap-3 content-start">
+                <div><label className="field-label">Title</label><input className="input" value={it.title} onChange={(e) => setItem(i, "title", e.target.value)} /></div>
+                <div><label className="field-label">Description</label><textarea className="input min-h-[64px]" value={it.body} onChange={(e) => setItem(i, "body", e.target.value)} /></div>
+                {canWrite && <div><button className="btn btn-sm bg-[#FCE9E9] text-[#B23030]" onClick={() => removeItem(i)}>Remove service</button></div>}
+              </div>
             </div>
           ))}
           {!services.items.length && <p className="text-steel text-[13.5px]">No services yet. Add one above.</p>}
         </div>
-        <p className="text-steel text-[12px] mt-3">The first 4 show on the homepage; all appear on the Services page.</p>
+        <p className="text-steel text-[12px] mt-3">The first 4 show on the homepage; all appear on the Services page. Leave the image as “Default photo” to use the built-in artwork.</p>
       </div>
 
       <div className="panel">

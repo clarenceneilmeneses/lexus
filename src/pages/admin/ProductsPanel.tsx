@@ -9,10 +9,13 @@ import ProductForm from "./ProductForm";
 
 type SortKey = "order" | "name" | "newest";
 
+const UNCATEGORIZED = "__none__";
+
 export default function ProductsPanel({ catalog, reload, canWrite }: { catalog: Catalog; reload: () => void; canWrite: boolean }) {
   const [editing, setEditing] = useState<Product | "new" | null>(null);
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("order");
+  const [cat, setCat] = useState<string>("all");
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const catName = (id: string | null) => catalog.categories.find((c) => c.id === id)?.name ?? "Uncategorized";
@@ -21,20 +24,33 @@ export default function ProductsPanel({ catalog, reload, canWrite }: { catalog: 
   const hidden = catalog.products.length - live;
   const featured = catalog.products.filter((p) => p.is_featured).length;
 
+  // Category options sorted by their own order, each with a live product count.
+  const catOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of catalog.products) counts.set(p.category_id ?? UNCATEGORIZED, (counts.get(p.category_id ?? UNCATEGORIZED) ?? 0) + 1);
+    const opts = [...catalog.categories]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((c) => ({ value: c.id, label: c.name, count: counts.get(c.id) ?? 0 }));
+    const uncategorized = counts.get(UNCATEGORIZED) ?? 0;
+    if (uncategorized) opts.push({ value: UNCATEGORIZED, label: "Uncategorized", count: uncategorized });
+    return opts;
+  }, [catalog.products, catalog.categories]);
+
   const list = useMemo(() => {
     const t = q.trim().toLowerCase();
-    let rows = catalog.products.filter(
-      (p) => !t || p.name.toLowerCase().includes(t) || (p.model ?? "").toLowerCase().includes(t) || catName(p.category_id).toLowerCase().includes(t)
-    );
+    let rows = catalog.products.filter((p) => {
+      if (cat !== "all" && (p.category_id ?? UNCATEGORIZED) !== cat) return false;
+      return !t || p.name.toLowerCase().includes(t) || (p.model ?? "").toLowerCase().includes(t) || catName(p.category_id).toLowerCase().includes(t);
+    });
     rows = [...rows].sort((a, b) =>
       sort === "name" ? a.name.localeCompare(b.name)
       : sort === "newest" ? b.id.localeCompare(a.id)
       : a.sort_order - b.sort_order
     );
     return rows;
-  }, [catalog.products, catalog.categories, q, sort]);
+  }, [catalog.products, catalog.categories, q, sort, cat]);
 
-  const { page, setPage, totalPages, pageItems, total, from, to } = usePagination(list, 12, `${q}|${sort}`);
+  const { page, setPage, totalPages, pageItems, total, from, to } = usePagination(list, 12, `${q}|${sort}|${cat}`);
 
   if (editing) {
     return (
@@ -69,11 +85,20 @@ export default function ProductsPanel({ catalog, reload, canWrite }: { catalog: 
 
       <div className="flex gap-2 flex-wrap mb-4">
         <input className="input max-w-[280px]" placeholder="Search name, model, category…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <select className="input max-w-[240px]" value={cat} onChange={(e) => setCat(e.target.value)}>
+          <option value="all">All categories ({catalog.products.length})</option>
+          {catOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label} ({o.count})</option>
+          ))}
+        </select>
         <select className="input max-w-[160px]" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
           <option value="order">Sort: manual order</option>
           <option value="name">Sort: name (A–Z)</option>
           <option value="newest">Sort: newest</option>
         </select>
+        {(cat !== "all" || q) && (
+          <button className="btn btn-ghost btn-sm" onClick={() => { setCat("all"); setQ(""); }}>Clear filters</button>
+        )}
       </div>
 
       <div className="panel">
@@ -98,7 +123,7 @@ export default function ProductsPanel({ catalog, reload, canWrite }: { catalog: 
             )}
           </div>
         ))}
-        {!list.length && <p className="text-steel">{q ? "No products match your search." : "No products yet."}</p>}
+        {!list.length && <p className="text-steel">{q || cat !== "all" ? "No products match your filters." : "No products yet."}</p>}
       </div>
 
       <Pagination page={page} totalPages={totalPages} onPage={setPage} from={from} to={to} total={total} />

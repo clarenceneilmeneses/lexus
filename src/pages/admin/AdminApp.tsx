@@ -12,9 +12,10 @@ import CategoriesPanel from "./CategoriesPanel";
 import InquiriesPanel from "./InquiriesPanel";
 import ContentPanel from "./ContentPanel";
 import UsersPanel from "./UsersPanel";
+import LogsPanel from "./LogsPanel";
 import SettingsPanel from "./SettingsPanel";
 
-type Tab = "dashboard" | "products" | "categories" | "inquiries" | "content" | "users" | "settings";
+type Tab = "dashboard" | "products" | "categories" | "inquiries" | "content" | "users" | "logs" | "settings";
 
 const icon = (d: string) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]">
@@ -30,6 +31,7 @@ const NAV: { key: Tab; label: string; icon: JSX.Element; adminOnly?: boolean }[]
   { key: "inquiries", label: "Inquiries", icon: icon("M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z") },
   { key: "content", label: "Content", icon: icon("M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z") },
   { key: "users", label: "Users", icon: icon("M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8"), adminOnly: true },
+  { key: "logs", label: "Activity log", icon: icon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"), adminOnly: true },
   { key: "settings", label: "Settings", icon: icon("M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"), adminOnly: true },
 ];
 
@@ -177,6 +179,7 @@ export default function AdminApp() {
               {tab === "inquiries" && <InquiriesPanel canWrite={can("inquiries")} canDelete={isAdmin} />}
               {tab === "content" && <ContentPanel catalog={catalog} reload={reload} canWrite={can("content")} />}
               {tab === "users" && (isAdmin ? <UsersPanel /> : <NoAccess />)}
+              {tab === "logs" && (isAdmin ? <LogsPanel /> : <NoAccess />)}
               {tab === "settings" && (isAdmin ? <SettingsPanel catalog={catalog} reload={reload} /> : <NoAccess />)}
             </>
           )}

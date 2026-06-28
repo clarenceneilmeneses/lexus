@@ -47,6 +47,18 @@ export interface Inquiry {
   created_at: string;
 }
 
+export interface AuditEntry {
+  id: number;
+  actor_id: string | null;
+  actor_email: string | null;
+  action: "insert" | "update" | "delete";
+  entity: string;          // products | categories | site_settings | profiles
+  entity_id: string | null;
+  label: string | null;
+  changes: Record<string, any> | null;
+  created_at: string;
+}
+
 export type Role = "viewer" | "editor" | "admin";
 
 export interface Profile {
@@ -65,7 +77,8 @@ export interface Branch {
 
 export interface HeroSettings { eyebrow: string; title: string; subtitle: string; cta_label: string; }
 export interface AboutSettings { title: string; body: string; stats: { label: string; value: string }[]; }
-export interface ServicesSettings { title: string; items: { title: string; body: string }[]; }
+export interface ServiceItem { title: string; body: string; image?: string | null; }
+export interface ServicesSettings { title: string; items: ServiceItem[]; }
 export interface ContactSettings { email: string; phone: string; address: string; hours: string; branches?: Branch[]; }
 export interface SocialSettings { facebook?: string; instagram?: string; linkedin?: string; }
 export interface SeoSettings { title?: string; description?: string; }

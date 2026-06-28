@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
-import type { Catalog, Inquiry } from "../../lib/types";
-import { fetchInquiries } from "../../lib/api";
+import type { AuditEntry, Catalog, Inquiry } from "../../lib/types";
+import { fetchAuditLog, fetchInquiries } from "../../lib/api";
+import { useAuth } from "../../hooks/useAuth";
 import { cn } from "../../lib/utils";
+import { ACTION_PILL, ACTION_VERB, entityLabel, relativeTime } from "../../lib/audit";
 import { StatCard, StatRow } from "../../components/StatCard";
 
-type Nav = "products" | "categories" | "inquiries" | "content";
+type Nav = "products" | "categories" | "inquiries" | "content" | "logs";
 
 export default function Dashboard({ catalog, go }: { catalog: Catalog; go: (tab: Nav) => void }) {
+  const { isAdmin } = useAuth();
   const [inquiries, setInquiries] = useState<Inquiry[] | null>(null);
+  const [activity, setActivity] = useState<AuditEntry[] | null>(null);
 
   useEffect(() => { fetchInquiries().then(setInquiries).catch(() => setInquiries([])); }, []);
+  useEffect(() => {
+    if (!isAdmin) return;
+    fetchAuditLog(5).then(setActivity).catch(() => setActivity([]));
+  }, [isAdmin]);
 
   const live = catalog.products.filter((p) => p.is_published).length;
   const featured = catalog.products.filter((p) => p.is_featured).length;
@@ -67,6 +75,36 @@ export default function Dashboard({ catalog, go }: { catalog: Catalog; go: (tab:
           </div>
         </div>
       </div>
+
+      {/* Recent activity — admins only (audit log is admin-gated) */}
+      {isAdmin && (
+        <div className="panel mt-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base">Recent activity</h3>
+            <button className="btn btn-ghost btn-sm" onClick={() => go("logs")}>View all →</button>
+          </div>
+          {activity === null ? (
+            <p className="font-mono text-steel text-sm">Loading…</p>
+          ) : activity.length === 0 ? (
+            <p className="text-steel text-sm">No changes recorded yet.</p>
+          ) : (
+            <div className="divide-y divide-line-2">
+              {activity.map((r) => (
+                <div key={r.id} className="py-2.5 flex items-center gap-3">
+                  <span className={cn("font-mono text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full flex-none", ACTION_PILL[r.action])}>
+                    {ACTION_VERB[r.action]}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <b className="text-[14px] break-words">{entityLabel(r.entity)}: {r.label || "—"}</b>
+                    <div className="font-mono text-[12px] text-steel truncate">{r.actor_email || "system"}</div>
+                  </div>
+                  <span className="font-mono text-[11px] text-steel whitespace-nowrap">{relativeTime(r.created_at)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

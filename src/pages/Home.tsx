@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import type { Catalog } from "../lib/types";
-import { primaryImage } from "../lib/utils";
+import { imgUrl, primaryImage } from "../lib/utils";
 import CategoryIcon from "../components/CategoryIcon";
 import ContactForm from "../components/ContactForm";
 import SectionNav, { type Section } from "../components/SectionNav";
@@ -172,7 +172,7 @@ export default function Home() {
                 className="group relative overflow-hidden rounded-[28px] bg-corp-navy min-h-[360px] lg:min-h-[440px] flex flex-col items-center text-center pt-12 px-8"
               >
                 <img
-                  src={SERVICE_IMG[i % SERVICE_IMG.length]}
+                  src={imgUrl(it.image) || SERVICE_IMG[i % SERVICE_IMG.length]}
                   alt={it.title}
                   loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-85 group-hover:scale-[1.04] transition-all duration-700 ease-smooth"

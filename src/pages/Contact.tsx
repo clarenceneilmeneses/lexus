@@ -20,8 +20,12 @@ export default function Contact() {
     <>
       <PageHeader
         eyebrow="Contact"
-        title="Request a quote"
-        subtitle="Tell us what you need and we'll respond with availability and pricing — including hard-to-find finishing materials."
+        title={product ? `Request a quote for ${product}` : "Request a quote"}
+        subtitle={
+          product
+            ? "We've started your request below — add your details and we'll respond with availability and pricing."
+            : "Tell us what you need and we'll respond with availability and pricing — including hard-to-find finishing materials."
+        }
       />
 
       <section className="py-14 lg:py-20">
