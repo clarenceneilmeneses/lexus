@@ -1,8 +1,7 @@
 import { useRef, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-import type { Catalog } from "../lib/types";
-import { imgUrl, primaryImage } from "../lib/utils";
-import CategoryIcon from "../components/CategoryIcon";
+import type { Catalog, Category } from "../lib/types";
+import { imgUrl, primaryImage, placeholder } from "../lib/utils";
 import ContactForm from "../components/ContactForm";
 import SectionNav, { type Section } from "../components/SectionNav";
 
@@ -32,13 +31,18 @@ const IMG = {
   worldbex: "/lexus/worldbex.jpg",
 };
 const SERVICE_IMG = [IMG.supply, IMG.lamination, IMG.metalFrame, IMG.cnc];
+const INTERIOR_IMG = [IMG.kitchen, IMG.dining, IMG.facade];
 
 export default function Home() {
   const { catalog } = useOutletContext<{ catalog: Catalog }>();
   const { settings, categories, products } = catalog;
-  const { hero, services, about, contact } = settings;
+  const { hero, services, about, contact, interiors, credentials } = settings;
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const lineupRef = useRef<HTMLDivElement>(null);
+  const scrollLineup = (dir: -1 | 1) => {
+    lineupRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
+  };
   const [muted, setMuted] = useState(true);
   const toggleMute = () => {
     const v = videoRef.current;
@@ -56,6 +60,13 @@ export default function Home() {
 
   const featured = products.filter((p) => p.is_featured);
   const lineup = (featured.length ? featured : products).slice(0, 10);
+  // image for each category tile: uploaded hero image → first product photo → branded placeholder
+  const categoryImage = (c: Category) => {
+    if (c.image_path) return imgUrl(c.image_path)!;
+    const p = products.find((pr) => pr.category_id === c.id && pr.images?.length);
+    return p ? primaryImage(p) : placeholder(c.name);
+  };
+  const topCategories = categories.slice(0, 8);
   const branches = contact.branches?.length
     ? contact.branches
     : [{ city: "Metro Manila", address: contact.address, phone: contact.phone, email: contact.email }];
@@ -106,7 +117,7 @@ export default function Home() {
             <video
               ref={videoRef}
               className="absolute inset-0 w-full h-full object-contain"
-              src={LEXUS_VIDEO}
+              src={hero.video_url?.trim() || LEXUS_VIDEO}
               poster={IMG.facade}
               autoPlay
               muted
@@ -154,8 +165,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ============================ SERVICES — Apple bento ============================ */}
-      <section id="services" className="py-20 lg:py-28 section-light scroll-mt-20">
+      {/* ============================ SERVICES — varied bento ============================ */}
+      <section id="services" className="py-16 lg:py-24 section-light scroll-mt-20">
         <div className="wrap">
           <div className="text-center max-w-2xl mx-auto mb-12 reveal">
             <span className="eyebrow-corp justify-center">What we do</span>
@@ -165,49 +176,77 @@ export default function Home() {
             <p className="text-[17px] text-corp-grey mt-4">Everything from raw boards to ready-to-install panels — handled in-house.</p>
           </div>
 
-          <div className="reveal grid sm:grid-cols-2 gap-5">
-            {services.items.slice(0, 4).map((it, i) => (
-              <article
-                key={i}
-                className="group relative overflow-hidden rounded-[28px] bg-corp-navy min-h-[360px] lg:min-h-[440px] flex flex-col items-center text-center pt-12 px-8"
-              >
-                <img
-                  src={imgUrl(it.image) || SERVICE_IMG[i % SERVICE_IMG.length]}
-                  alt={it.title}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-85 group-hover:scale-[1.04] transition-all duration-700 ease-smooth"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/60" />
-                <div className="relative">
-                  <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-glow">{String(i + 1).padStart(2, "0")}</span>
-                  <h3 className="font-display font-semibold text-[26px] lg:text-[30px] text-white tracking-tight mt-2 leading-tight">{it.title}</h3>
-                  <p className="text-[15px] text-white/80 mt-3 max-w-sm mx-auto leading-relaxed">{it.body}</p>
-                  <Link to="/services" className="inline-flex items-center gap-1 font-display font-semibold text-[14px] text-white mt-5 group/link">
-                    Learn more <span className="transition-transform group-hover/link:translate-x-0.5">›</span>
-                  </Link>
-                </div>
-              </article>
-            ))}
+          {/* asymmetric rhythm: items 0 & 3 run wide, 1 & 2 stay square */}
+          <div className="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-fr">
+            {services.items.slice(0, 4).map((it, i) => {
+              const wide = i === 0 || i === 3;
+              return (
+                <article
+                  key={i}
+                  className={`group relative overflow-hidden rounded-[28px] bg-corp-navy flex flex-col justify-end p-8 lg:p-10 ${
+                    wide ? "sm:col-span-2 lg:col-span-2 min-h-[300px] lg:min-h-[340px]" : "min-h-[300px]"
+                  }`}
+                >
+                  <img
+                    src={imgUrl(it.image) || SERVICE_IMG[i % SERVICE_IMG.length]}
+                    alt={it.title}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-90 group-hover:scale-[1.04] transition-all duration-700 ease-smooth"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+                  <div className="relative">
+                    <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-glow">{String(i + 1).padStart(2, "0")}</span>
+                    <h3 className="font-display font-semibold text-[24px] lg:text-[28px] text-white tracking-tight mt-2 leading-tight">{it.title}</h3>
+                    <p className="text-[15px] text-white/80 mt-2.5 max-w-md leading-relaxed">{it.body}</p>
+                    <Link to="/services" className="inline-flex items-center gap-1 font-display font-semibold text-[14px] text-white mt-4 group/link">
+                      Learn more <span className="transition-transform group-hover/link:translate-x-0.5">›</span>
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ============================ PRODUCTS — Apple lineup carousel ============================ */}
-      <section id="products" className="py-20 lg:py-28 bg-white border-y border-line overflow-hidden scroll-mt-20">
+      <section id="products" className="py-16 lg:py-24 bg-white border-y border-line overflow-hidden scroll-mt-20">
         <div className="wrap">
           <div className="flex items-end justify-between gap-5 flex-wrap mb-10 reveal">
             <div>
               <span className="eyebrow-corp">The lineup</span>
               <h2 className="text-[clamp(28px,4vw,52px)] font-semibold tracking-tight text-corp-navy mt-3">Featured products.</h2>
             </div>
-            <Link to="/products" className="group inline-flex items-center gap-1 font-display font-semibold text-[15px] text-corp-orange">
-              Explore the full catalog <span className="transition-transform group-hover:translate-x-0.5">›</span>
-            </Link>
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:flex items-center gap-2">
+                <button
+                  onClick={() => scrollLineup(-1)}
+                  aria-label="Scroll products left"
+                  className="w-10 h-10 grid place-items-center rounded-full border border-line text-corp-navy text-xl leading-none hover:border-corp-orange hover:text-corp-orange transition-colors"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={() => scrollLineup(1)}
+                  aria-label="Scroll products right"
+                  className="w-10 h-10 grid place-items-center rounded-full border border-line text-corp-navy text-xl leading-none hover:border-corp-orange hover:text-corp-orange transition-colors"
+                >
+                  ›
+                </button>
+              </div>
+              <Link to="/products" className="group inline-flex items-center gap-1 font-display font-semibold text-[15px] text-corp-orange">
+                Explore the full catalog <span className="transition-transform group-hover:translate-x-0.5">›</span>
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* edge-to-edge horizontal snap scroller */}
-        <div className="reveal flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 px-[max(1.5rem,calc((100%-1200px)/2))] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* edge-to-edge horizontal snap scroller, with a right-edge fade hinting more */}
+        <div className="relative">
+          <div
+            ref={lineupRef}
+            className="reveal flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 px-[max(1.5rem,calc((100%-1200px)/2))] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
           {lineup.map((p) => (
             <Link
               key={p.id}
@@ -226,31 +265,45 @@ export default function Home() {
               </div>
             </Link>
           ))}
+          </div>
+          <div className="pointer-events-none absolute right-0 top-0 bottom-4 w-16 bg-gradient-to-l from-white to-transparent hidden sm:block" />
         </div>
       </section>
 
       {/* ============================ CATEGORIES — clean grid ============================ */}
-      <section id="categories" className="py-20 lg:py-28 section-light scroll-mt-20">
+      <section id="categories" className="py-16 lg:py-24 section-light scroll-mt-20">
         <div className="wrap">
           <div className="text-center max-w-2xl mx-auto mb-12 reveal">
             <span className="eyebrow-corp justify-center">Our products</span>
             <h2 className="text-[clamp(28px,4vw,52px)] font-semibold tracking-tight text-corp-navy mt-3">Shop by category.</h2>
+            <p className="text-[17px] text-corp-grey mt-4">From boards and panels to framing and finishes — browse the full range by category.</p>
           </div>
-          <div className="reveal grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))" }}>
-            {categories.map((c, i) => (
+
+          {/* clean image-card grid */}
+          <div className="reveal grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {topCategories.map((c, i) => (
               <Link
                 key={c.id}
                 to={`/products?cat=${c.slug}`}
-                className="group rounded-3xl bg-white border border-line p-7 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lift hover:border-corp-orange"
+                className="group relative block overflow-hidden rounded-2xl aspect-[4/5] bg-corp-navy"
               >
-                <span className="w-14 h-14 mx-auto grid place-items-center rounded-2xl bg-corp-soft text-corp-navy group-hover:bg-corp-orange group-hover:text-white transition-colors">
-                  <CategoryIcon slug={c.slug} className="w-6 h-6" />
-                </span>
-                <h3 className="font-display font-semibold text-[16px] text-corp-navy tracking-tight mt-4 leading-tight">{c.name}</h3>
-                <p className="text-[12.5px] text-corp-grey leading-relaxed line-clamp-2 mt-1.5">{c.description}</p>
-                <span className="font-mono text-[11px] text-corp-orange font-bold inline-block mt-3">{String(i + 1).padStart(2, "0")}</span>
+                <img
+                  src={categoryImage(c)}
+                  alt={c.name}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.05] transition-all duration-700 ease-smooth"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-corp-navy/90 via-corp-navy/20 to-transparent" />
+                <span className="absolute top-3.5 right-4 font-mono text-[11px] font-bold text-white/55">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="absolute left-4 right-4 bottom-4 font-display font-semibold text-[16px] text-white tracking-tight leading-tight">{c.name}</h3>
               </Link>
             ))}
+          </div>
+
+          <div className="flex justify-center mt-10 reveal">
+            <Link to="/products" className="pill-outline">
+              View all categories <span className="transition-transform group-hover:translate-x-0.5">›</span>
+            </Link>
           </div>
         </div>
       </section>
@@ -259,53 +312,69 @@ export default function Home() {
       <section id="interiors" className="py-20 lg:py-28 bg-white border-y border-line scroll-mt-20">
         <div className="wrap">
           <div className="text-center max-w-2xl mx-auto mb-12 reveal">
-            <span className="eyebrow-corp justify-center">Designed to be lived in</span>
-            <h2 className="text-[clamp(28px,4vw,52px)] font-semibold tracking-tight text-corp-navy mt-3">Finished with Lexus.</h2>
-            <p className="text-[17px] text-corp-grey mt-4">From kitchens to facades — interiors that designers and homeowners love.</p>
+            <span className="eyebrow-corp justify-center">{interiors.eyebrow}</span>
+            <h2 className="text-[clamp(28px,4vw,52px)] font-semibold tracking-tight text-corp-navy mt-3">{interiors.title}</h2>
+            {interiors.subtitle && <p className="text-[17px] text-corp-grey mt-4">{interiors.subtitle}</p>}
           </div>
           <div className="reveal grid lg:grid-cols-3 gap-5">
-            <div className="group relative overflow-hidden rounded-[28px] lg:row-span-2 aspect-[3/4] lg:aspect-auto bg-corp-navy">
-              <img src={IMG.kitchen} alt="Modern kitchen finished with Lexus materials" loading="lazy" className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.04] transition-all duration-700 ease-smooth" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
-              <div className="absolute left-6 bottom-6">
-                <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-glow">Residential</span>
-                <div className="font-display font-semibold text-white text-2xl tracking-tight">Kitchens & cabinetry</div>
-              </div>
-            </div>
-            <div className="group relative overflow-hidden rounded-[28px] aspect-[4/3] lg:aspect-auto lg:min-h-[210px] bg-corp-navy">
-              <img src={IMG.dining} alt="Dining interior fit-out" loading="lazy" className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.04] transition-all duration-700 ease-smooth" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-              <div className="absolute left-5 bottom-5">
-                <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent-glow">Hospitality</span>
-                <div className="font-display font-semibold text-white text-xl tracking-tight">Dining & living spaces</div>
-              </div>
-            </div>
-            <div className="group relative overflow-hidden rounded-[28px] aspect-[4/3] lg:aspect-auto lg:min-h-[210px] bg-corp-navy">
-              <img src={IMG.facade} alt="Building facade supplied by Lexus" loading="lazy" className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.04] transition-all duration-700 ease-smooth" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-              <div className="absolute left-5 bottom-5">
-                <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-accent-glow">Commercial</span>
-                <div className="font-display font-semibold text-white text-xl tracking-tight">Facades & cladding</div>
-              </div>
-            </div>
+            {interiors.items.map((it, i) => {
+              const big = i === 0;
+              return (
+                <div
+                  key={i}
+                  className={`group relative overflow-hidden rounded-[28px] bg-corp-navy ${
+                    big ? "lg:row-span-2 aspect-[3/4] lg:aspect-auto" : "aspect-[4/3] lg:aspect-auto lg:min-h-[210px]"
+                  }`}
+                >
+                  <img
+                    src={imgUrl(it.image) || INTERIOR_IMG[i % INTERIOR_IMG.length]}
+                    alt={it.title}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.04] transition-all duration-700 ease-smooth"
+                  />
+                  <div className={`absolute inset-0 bg-gradient-to-t from-black/70 ${big ? "via-black/5" : ""} to-transparent`} />
+                  <div className={big ? "absolute left-6 bottom-6" : "absolute left-5 bottom-5"}>
+                    <span className={`font-mono tracking-[0.16em] uppercase text-accent-glow ${big ? "text-[11px]" : "text-[10px]"}`}>{it.eyebrow}</span>
+                    <div className={`font-display font-semibold text-white tracking-tight ${big ? "text-2xl" : "text-xl"}`}>{it.title}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ============================ CREDENTIALS — WORLDBEX exhibitor ============================ */}
-      <section id="credentials" className="py-20 lg:py-24 section-light scroll-mt-20">
+      {/* ============================ CREDENTIALS — WORLDBEX trust band ============================ */}
+      <section id="credentials" className="py-14 lg:py-20 section-light scroll-mt-20">
         <div className="wrap">
-          <div className="text-center max-w-2xl mx-auto mb-8 reveal">
-            <span className="eyebrow-corp justify-center">Credentials</span>
-            <h2 className="text-[clamp(28px,4vw,52px)] font-semibold tracking-tight text-corp-navy mt-3">Recognized in the industry.</h2>
-            <p className="text-[17px] text-corp-grey mt-4">A proud exhibitor at WORLDBEX — the Philippines' biggest building &amp; construction exposition.</p>
+          <div className="reveal grid lg:grid-cols-2 items-stretch rounded-[28px] overflow-hidden border border-line shadow-card bg-white">
+            <div className="relative bg-corp-soft flex items-center justify-center p-5 lg:p-7">
+              <img
+                src={imgUrl(credentials.image) || IMG.worldbex}
+                alt={credentials.caption || credentials.title}
+                loading="lazy"
+                className="w-full max-w-[460px] h-auto object-contain rounded-2xl shadow-card"
+              />
+            </div>
+            <div className="p-8 lg:p-12 flex flex-col justify-center">
+              <span className="eyebrow-corp">{credentials.eyebrow}</span>
+              <h2 className="text-[clamp(24px,3.2vw,40px)] font-semibold tracking-tight text-corp-navy mt-3">{credentials.title}</h2>
+              {credentials.body && <p className="text-[16px] text-corp-grey mt-4 leading-relaxed">{credentials.body}</p>}
+              {credentials.stats.length > 0 && (
+                <div className="mt-7 grid grid-cols-3 gap-4 border-t border-line pt-6">
+                  {credentials.stats.slice(0, 3).map((st, i) => (
+                    <div key={i}>
+                      <div className="font-display font-bold text-corp-navy text-2xl">{st.value}</div>
+                      <div className="font-mono text-[11px] tracking-[0.1em] uppercase text-corp-grey mt-1">{st.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {credentials.caption && (
+                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-corp-grey mt-6">{credentials.caption}</p>
+              )}
+            </div>
           </div>
-          <div className="reveal mx-auto max-w-4xl rounded-3xl overflow-hidden border border-line shadow-card bg-white">
-            <img src={IMG.worldbex} alt="Lexus Industrial — official exhibitor at WORLDBEX 2025, SMX Convention Center, Manila" className="w-full h-auto" />
-          </div>
-          <p className="text-center font-mono text-[12px] tracking-[0.12em] uppercase text-corp-grey mt-5 reveal">
-            Official exhibitor · WORLDBEX 2025 · SMX Convention Center, Manila
-          </p>
         </div>
       </section>
 

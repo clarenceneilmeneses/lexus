@@ -8,7 +8,7 @@ body { @apply bg-paper text-ink font-body antialiased; margin: 0; }
 h1, h2, h3, h4 { @apply font-display; letter-spacing: -0.02em; line-height: 1.04; }
 
 /* Selection + scrollbar polish */
-::selection { background: #1D67CD; color: #fff; }
+::selection { background: #232c6d; color: #fff; }
 /* Slim, translucent scrollbar — unobtrusive over both light and dark sections. */
 html { scrollbar-width: thin; scrollbar-color: rgba(120,128,150,.4) transparent; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -141,4 +141,4 @@ html { scrollbar-width: thin; scrollbar-color: rgba(120,128,150,.4) transparent;
   * { transition: none !important; scroll-behavior: auto; animation: none !important; }
   .reveal { opacity: 1; transform: none; }
 }
-*:focus-visible { outline: 2.5px solid #1D67CD; outline-offset: 2px; }
+*:focus-visible { outline: 2.5px solid #232c6d; outline-offset: 2px; }

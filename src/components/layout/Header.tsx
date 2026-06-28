@@ -13,31 +13,21 @@ const LINKS = [
 ] as const;
 
 export function Brand({ className = "h-9", tone = "light" }: { className?: string; tone?: "light" | "dark" }) {
-  // We only ship a flat logo silhouette (white PNG with transparency). Recolor
-  // it via CSS mask so it keeps the brand's logo blue on light backgrounds
-  // (tone="dark") and stays white on dark ones — never pure black.
+  // Full-colour brand logo (navy mark + red star). The PNG has a transparent
+  // surround, so on light backgrounds (tone="dark") it sits flush; on dark
+  // backgrounds (tone="light") we set it on a white badge so the navy stays legible.
+  const img = (
+    <img
+      src="/lexus/lexus-logo.png"
+      alt="Lexus Industrial Enterprise Corporation"
+      className={cn("w-auto object-contain transition-transform duration-200 group-hover:scale-[1.03]", className)}
+    />
+  );
   return (
     <Link to="/" className="flex items-center gap-3 group shrink-0" aria-label="Lexus Industrial — Home">
-      <span
-        role="img"
-        aria-label="Lexus Industrial Enterprise Corporation"
-        className={cn(
-          "block w-auto transition-transform duration-200 group-hover:scale-[1.03]",
-          className
-        )}
-        style={{
-          aspectRatio: "140 / 48",
-          backgroundColor: tone === "dark" ? "#5560A8" : "#ffffff",
-          WebkitMaskImage: "url(/brand/logo-white.png)",
-          maskImage: "url(/brand/logo-white.png)",
-          WebkitMaskRepeat: "no-repeat",
-          maskRepeat: "no-repeat",
-          WebkitMaskPosition: "left center",
-          maskPosition: "left center",
-          WebkitMaskSize: "contain",
-          maskSize: "contain",
-        }}
-      />
+      {tone === "light"
+        ? <span className="inline-flex items-center bg-white rounded-lg px-3 py-2 shadow-card">{img}</span>
+        : img}
     </Link>
   );
 }
@@ -164,7 +154,7 @@ export default function Header({ categories = [] }: { categories?: Category[] })
                         Tell us the spec and quantity — we'll get back fast.
                       </p>
                     </div>
-                    <Link to="/contact" className="pill-orange text-[13px] px-5 py-2 mt-5 self-start">Request a quote</Link>
+                    <Link to="/contact" className="pill bg-white text-corp-navy hover:bg-accent-soft text-[13px] px-5 py-2 mt-5 self-start">Request a quote</Link>
                   </aside>
                 </div>
               </div>

@@ -62,7 +62,7 @@ export default function Services() {
               <h2 className="text-[clamp(24px,3vw,38px)] font-semibold tracking-tight leading-tight">Let's talk about your requirements.</h2>
               <p className="text-white/75 mt-2 text-lg">Bulk orders, sourcing, or recurring supply — we're ready.</p>
             </div>
-            <Link to="/contact" className="pill-orange shrink-0">Get in touch</Link>
+            <Link to="/contact" className="pill bg-white text-corp-navy hover:bg-accent-soft shrink-0">Get in touch</Link>
           </div>
         </div>
       </section>

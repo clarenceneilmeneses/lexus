@@ -4,30 +4,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Navy — Lexus brand dark (headings, dark sections, utility bar)
-        ink: { DEFAULT: "#1D2565", 2: "#2A337A", 3: "#141A4D" },
+        // Lexus brand navy #232c6d — sampled from the logo. The single accent
+        // colour across the whole system (headings, dark sections, actions).
+        ink: { DEFAULT: "#232c6d", 2: "#2E3884", 3: "#181E52" },
         steel: { DEFAULT: "#5B6573", 2: "#9AA1B8" },
         line: { DEFAULT: "#E4E7EC", 2: "#EEF0F3" },
-        // Royal blue — primary brand / actions
-        brand: { DEFAULT: "#1D67CD", d: "#17539F", soft: "#E7F0FB", glow: "#3F86E6" },
-        // Logo periwinkle — brand accent (eyebrows, underlines, highlights).
-        // Sampled from the Lexus logo's blue. `glow` is the lighter tint for
-        // accents sitting on dark/navy backgrounds (photos, the admin sidebar).
-        accent: { DEFAULT: "#5560A8", d: "#3B447F", soft: "#E6E8F6", glow: "#AAB2E2" },
-        // Red — logo mark accent
+        // Primary brand / actions — the brand navy, with a lighter `glow` tint
+        // for accents sitting on dark/navy backgrounds.
+        brand: { DEFAULT: "#232c6d", d: "#1A2052", soft: "#E7EAF6", glow: "#4D58A8" },
+        // Accent — same brand navy; `glow` is the lighter periwinkle for accents
+        // on dark/navy backgrounds (photos, the admin sidebar).
+        accent: { DEFAULT: "#232c6d", d: "#1A2052", soft: "#E6E8F6", glow: "#AAB2E2" },
+        // Red — logo star accent
         flag: "#EA492E",
         paper: "#F4F5F7",
         sand: "#F7F8FB",
-        // Light corporate palette (landing page) — mirrors the reference design
+        // Light corporate palette (landing page)
         corp: {
           bg: "#f9f9fb",
-          navy: "#32327f",
-          navyD: "#262366",
-          // Accent retired from orange to the logo periwinkle (kept the key
-          // name so existing `corp-orange` classes flip site-wide at once).
-          orange: "#5560A8",
-          orangeD: "#3B447F",
-          soft: "#dbdbff",
+          navy: "#232c6d",
+          navyD: "#1A2052",
+          // Accent key (kept the `orange` name so existing `corp-orange`
+          // classes flip site-wide at once) — now the brand navy.
+          orange: "#232c6d",
+          orangeD: "#1A2052",
+          soft: "#E3E5F6",
           grey: "#6D6D6D",
         },
       },
@@ -41,9 +42,9 @@ export default {
       borderRadius: { DEFAULT: "4px" },
       maxWidth: { content: "1200px" },
       boxShadow: {
-        card: "0 1px 2px rgba(29,37,101,.04), 0 12px 30px -22px rgba(29,37,101,.45)",
-        lift: "0 18px 44px -24px rgba(29,37,101,.55)",
-        glow: "0 14px 40px -16px rgba(29,103,205,.55)",
+        card: "0 1px 2px rgba(35,44,109,.04), 0 12px 30px -22px rgba(35,44,109,.45)",
+        lift: "0 18px 44px -24px rgba(35,44,109,.55)",
+        glow: "0 14px 40px -16px rgba(35,44,109,.55)",
       },
       transitionTimingFunction: {
         smooth: "cubic-bezier(.22,1,.36,1)",

@@ -8,6 +8,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
     subtitle:
       "Wholesale and retail supplier of modern interior finishings and trusted international brands — boards, panels, drywall, ceiling systems, and more — from our head office in Metro Manila.",
     cta_label: "Browse products",
+    video_url: "",
   },
   about: {
     title: "About Lexus Industrial",
@@ -25,6 +26,28 @@ const DEFAULT_SETTINGS: SiteSettings = {
       { title: "Lamination Services", body: "Professional lamination of boards and panels to your required finishes and sizes." },
       { title: "Metal Production", body: "Fabrication of light steel frame and metal components for walls and ceilings." },
       { title: "Cutting & Edging", body: "Precision cut-to-size and edgebanding for ready-to-install panels." },
+    ],
+  },
+  interiors: {
+    eyebrow: "Designed to be lived in",
+    title: "Finished with Lexus.",
+    subtitle: "From kitchens to facades — interiors that designers and homeowners love.",
+    items: [
+      { eyebrow: "Residential", title: "Kitchens & cabinetry", image: null },
+      { eyebrow: "Hospitality", title: "Dining & living spaces", image: null },
+      { eyebrow: "Commercial", title: "Facades & cladding", image: null },
+    ],
+  },
+  credentials: {
+    eyebrow: "Credentials",
+    title: "Recognized in the industry.",
+    body: "A proud exhibitor at WORLDBEX — the Philippines' biggest building & construction exposition.",
+    caption: "WORLDBEX 2026 · WTC Metro Manila · Booth 1013–1014 & 1035–1036",
+    image: null,
+    stats: [
+      { value: "2026", label: "Exhibitor" },
+      { value: "WTC", label: "Metro Manila" },
+      { value: "#1", label: "PH expo" },
     ],
   },
   contact: {
@@ -168,7 +191,7 @@ export async function deleteSiteImages(paths: string[]): Promise<void> {
 }
 
 // ---------- Admin: categories ----------
-export async function saveCategory(input: { name: string; slug: string; description: string; sort_order: number }, id?: string) {
+export async function saveCategory(input: { name: string; slug: string; description: string; image_path: string | null; sort_order: number }, id?: string) {
   const q = id
     ? supabase.from("categories").update(input).eq("id", id)
     : supabase.from("categories").insert(input);

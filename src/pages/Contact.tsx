@@ -36,7 +36,7 @@ export default function Contact() {
             <InfoRow label="Hours" value={c.hours} />
             <InfoRow label="Location" value={c.address} />
             <div className="bg-corp-navy text-white rounded-2xl p-6 mt-2">
-              <div className="font-mono text-[11px] tracking-[0.14em] uppercase text-corp-orange font-bold">Since 1995</div>
+              <div className="font-mono text-[11px] tracking-[0.14em] uppercase text-accent-glow font-bold">Since 1995</div>
               <p className="text-[14px] text-white/75 mt-2 leading-relaxed">
                 Wholesale &amp; retail supply of modern interior finishings — trusted by the interior design industry.
               </p>

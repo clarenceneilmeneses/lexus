@@ -84,7 +84,7 @@ export default function AdminApp() {
         className={cn(
           "flex items-center gap-3 w-full rounded-xl font-display font-semibold text-[14px] transition-colors",
           collapsed ? "md:justify-center md:px-0 px-3.5 py-2.5" : "px-3.5 py-2.5",
-          tab === n.key ? "bg-corp-orange text-white" : "text-[#c3cad6] hover:bg-white/10 hover:text-white"
+          tab === n.key ? "bg-accent-glow text-corp-navy" : "text-[#c3cad6] hover:bg-white/10 hover:text-white"
         )}
       >
         <span className="flex-none">{n.icon}</span>

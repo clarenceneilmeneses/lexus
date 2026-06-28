@@ -5,6 +5,7 @@ export interface Category {
   name: string;
   slug: string;
   description: string | null;
+  image_path: string | null;
   sort_order: number;
 }
 
@@ -75,11 +76,15 @@ export interface Branch {
   email?: string;
 }
 
-export interface HeroSettings { eyebrow: string; title: string; subtitle: string; cta_label: string; }
+export interface HeroSettings { eyebrow: string; title: string; subtitle: string; cta_label: string; video_url?: string; }
 export interface AboutSettings { title: string; body: string; stats: { label: string; value: string }[]; }
 export interface ServiceItem { title: string; body: string; image?: string | null; }
 export interface ServicesSettings { title: string; items: ServiceItem[]; }
 export interface ContactSettings { email: string; phone: string; address: string; hours: string; branches?: Branch[]; }
+export interface InteriorItem { eyebrow: string; title: string; image?: string | null; }
+export interface InteriorsSettings { eyebrow: string; title: string; subtitle: string; items: InteriorItem[]; }
+export interface CredentialStat { value: string; label: string; }
+export interface CredentialsSettings { eyebrow: string; title: string; body: string; caption: string; image?: string | null; stats: CredentialStat[]; }
 export interface SocialSettings { facebook?: string; instagram?: string; linkedin?: string; }
 export interface SeoSettings { title?: string; description?: string; }
 
@@ -87,6 +92,8 @@ export interface SiteSettings {
   hero: HeroSettings;
   about: AboutSettings;
   services: ServicesSettings;
+  interiors: InteriorsSettings;
+  credentials: CredentialsSettings;
   contact: ContactSettings;
   social: SocialSettings;
   seo: SeoSettings;

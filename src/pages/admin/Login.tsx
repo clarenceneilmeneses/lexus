@@ -24,7 +24,7 @@ export default function Login() {
       <div className="w-full max-w-[384px]">
         {/* Brand + welcome */}
         <div className="flex flex-col items-center text-center mb-7">
-          <Brand tone="dark" className="h-9 mb-6" />
+          <Brand tone="dark" className="h-12 mb-6" />
           <h1 className="text-[26px] text-ink">Welcome back</h1>
           <p className="text-steel text-[14.5px] mt-1.5">Sign in to manage your catalog and inquiries.</p>
         </div>
