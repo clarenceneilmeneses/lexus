@@ -85,6 +85,10 @@ export interface InteriorItem { eyebrow: string; title: string; image?: string |
 export interface InteriorsSettings { eyebrow: string; title: string; subtitle: string; items: InteriorItem[]; }
 export interface CredentialStat { value: string; label: string; }
 export interface CredentialsSettings { eyebrow: string; title: string; body: string; caption: string; image?: string | null; stats: CredentialStat[]; }
+export interface Testimonial { quote: string; author: string; role?: string; }
+export interface TestimonialsSettings { eyebrow: string; title: string; items: Testimonial[]; }
+export interface PartnerLogo { name: string; image?: string | null; }
+export interface PartnersSettings { eyebrow: string; title: string; items: PartnerLogo[]; }
 export interface SocialSettings { facebook?: string; instagram?: string; linkedin?: string; }
 export interface SeoSettings { title?: string; description?: string; }
 
@@ -94,6 +98,8 @@ export interface SiteSettings {
   services: ServicesSettings;
   interiors: InteriorsSettings;
   credentials: CredentialsSettings;
+  testimonials: TestimonialsSettings;
+  partners: PartnersSettings;
   contact: ContactSettings;
   social: SocialSettings;
   seo: SeoSettings;

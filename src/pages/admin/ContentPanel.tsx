@@ -1,16 +1,22 @@
 import { useRef, useState } from "react";
-import type { Catalog, CredentialsSettings, InteriorsSettings, ServicesSettings } from "../../lib/types";
+import type { Catalog, CredentialsSettings, InteriorsSettings, PartnersSettings, ServicesSettings } from "../../lib/types";
 import { deleteSiteImages, saveSettings, uploadSiteImage } from "../../lib/api";
 import { imgUrl } from "../../lib/utils";
 import { StatCard, StatRow } from "../../components/StatCard";
 
 // Every site-image path referenced across the editable content blocks — used to
 // reconcile storage at save time and delete whatever ends up unreferenced.
-const contentImages = (services: ServicesSettings, interiors: InteriorsSettings, credentials: CredentialsSettings) =>
+const contentImages = (
+  services: ServicesSettings,
+  interiors: InteriorsSettings,
+  credentials: CredentialsSettings,
+  partners: PartnersSettings,
+) =>
   [
     ...services.items.map((it) => it.image),
     ...interiors.items.map((it) => it.image),
     credentials.image,
+    ...partners.items.map((it) => it.image),
   ].filter((p): p is string => !!p);
 
 export default function ContentPanel({ catalog, reload, canWrite }: { catalog: Catalog; reload: () => void; canWrite: boolean }) {
@@ -21,16 +27,19 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
   const [services, setServices] = useState(s.services);
   const [interiors, setInteriors] = useState(s.interiors);
   const [credentials, setCredentials] = useState(s.credentials);
+  const [testimonials, setTestimonials] = useState(s.testimonials);
+  const [partners, setPartners] = useState(s.partners);
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [imgBusy, setImgBusy] = useState<number | null>(null);
   const [intImgBusy, setIntImgBusy] = useState<number | null>(null);
   const [credImgBusy, setCredImgBusy] = useState(false);
+  const [partImgBusy, setPartImgBusy] = useState<number | null>(null);
 
   // Image paths currently persisted in the DB, and every path uploaded this
   // session — used at save time to delete whatever ends up unreferenced.
-  const persistedImages = useRef<Set<string>>(new Set(contentImages(s.services, s.interiors, s.credentials)));
+  const persistedImages = useRef<Set<string>>(new Set(contentImages(s.services, s.interiors, s.credentials, s.partners)));
   const uploadedImages = useRef<Set<string>>(new Set());
 
   const setItem = (i: number, k: "title" | "body", v: string) =>
@@ -102,6 +111,36 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
     } finally { setCredImgBusy(false); }
   }
 
+  // ---- Testimonials (quote band) ----
+  const setTestItem = (i: number, k: "quote" | "author" | "role", v: string) =>
+    setTestimonials((tv) => ({ ...tv, items: tv.items.map((it, j) => (j === i ? { ...it, [k]: v } : it)) }));
+  const addTestItem = () =>
+    setTestimonials((tv) => ({ ...tv, items: [...tv.items, { quote: "", author: "", role: "" }] }));
+  const removeTestItem = (i: number) =>
+    setTestimonials((tv) => ({ ...tv, items: tv.items.filter((_, j) => j !== i) }));
+
+  // ---- Partners (logo wall) ----
+  const setPartName = (i: number, v: string) =>
+    setPartners((pv) => ({ ...pv, items: pv.items.map((it, j) => (j === i ? { ...it, name: v } : it)) }));
+  const setPartImage = (i: number, path: string | null) =>
+    setPartners((pv) => ({ ...pv, items: pv.items.map((it, j) => (j === i ? { ...it, image: path } : it)) }));
+  const addPartItem = () =>
+    setPartners((pv) => ({ ...pv, items: [...pv.items, { name: "", image: null }] }));
+  const removePartItem = (i: number) =>
+    setPartners((pv) => ({ ...pv, items: pv.items.filter((_, j) => j !== i) }));
+
+  async function uploadPartImage(i: number, file: File | undefined) {
+    if (!file) return;
+    setErr(""); setPartImgBusy(i);
+    try {
+      const path = await uploadSiteImage(file, "partners");
+      uploadedImages.current.add(path);
+      setPartImage(i, path);
+    } catch (e: any) {
+      setErr(e?.message ?? "Image upload failed.");
+    } finally { setPartImgBusy(null); }
+  }
+
   async function save() {
     setBusy(true); setErr("");
     try {
@@ -109,10 +148,14 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
       const intItems = interiors.items.filter((it) => it.title.trim() || it.eyebrow.trim() || it.image);
       const credStats = credentials.stats.filter((st) => st.value.trim() || st.label.trim());
       const aboutStats = about.stats.filter((st) => st.value.trim() || st.label.trim());
+      const testItems = testimonials.items.filter((it) => it.quote.trim() || it.author.trim());
+      const partItems = partners.items.filter((it) => it.name.trim() || it.image);
       const savedAbout = { ...about, stats: aboutStats };
       const savedServices = { ...services, items };
       const savedInteriors = { ...interiors, items: intItems };
       const savedCredentials = { ...credentials, stats: credStats };
+      const savedTestimonials = { ...testimonials, items: testItems };
+      const savedPartners = { ...partners, items: partItems };
       await saveSettings([
         { key: "hero", value: hero },
         { key: "about", value: savedAbout },
@@ -120,11 +163,13 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
         { key: "services", value: savedServices },
         { key: "interiors", value: savedInteriors },
         { key: "credentials", value: savedCredentials },
+        { key: "testimonials", value: savedTestimonials },
+        { key: "partners", value: savedPartners },
       ]);
 
       // Reconcile storage: delete any previously-persisted or this-session-uploaded
       // image that the saved content no longer references.
-      const kept = new Set(contentImages(savedServices, savedInteriors, savedCredentials));
+      const kept = new Set(contentImages(savedServices, savedInteriors, savedCredentials, savedPartners));
       const orphans = [...persistedImages.current, ...uploadedImages.current].filter((p) => !kept.has(p));
       if (orphans.length) await deleteSiteImages([...new Set(orphans)]).catch(() => { /* best effort */ });
       persistedImages.current = kept;
@@ -150,7 +195,7 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
       {!canWrite && <div className="bg-line-2 text-steel px-3.5 py-3 rounded text-[13.5px] mb-3.5">Read-only — your role can't edit content.</div>}
       {msg && <div className="bg-[#E8F7EF] border border-[#B6E6CB] text-[#137A43] px-3.5 py-3 rounded text-[13.5px] mb-3.5">{msg}</div>}
       {err && <div className="bg-[#FDECEA] border border-[#F5C2BA] text-[#B23120] px-3.5 py-3 rounded text-[13.5px] mb-3.5">{err}</div>}
-      <p className="text-steel text-[13px] mb-4">Edit the text shown across the public site, then <b>Save changes</b>. Sections below: Hero · About · Services · Interiors · Credentials · Contact.</p>
+      <p className="text-steel text-[13px] mb-4">Edit the text shown across the public site, then <b>Save changes</b>. Sections below: Hero · About · Services · Interiors · Credentials · Testimonials · Partners · Contact.</p>
 
       <div className="panel mb-4.5">
         <h3 className="text-base mb-3">Homepage hero</h3>
@@ -323,6 +368,75 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
           </div>
           <p className="text-steel text-[12px] mt-3">The first 3 stats show on the homepage. Leave the image as “Default poster” to use the built-in WORLDBEX artwork.</p>
         </div>
+      </div>
+
+      {/* Testimonials — quote band */}
+      <div className="panel mb-4.5">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-base">Testimonials</h3>
+          {canWrite && <button className="btn btn-ghost btn-sm" onClick={addTestItem}>+ Add quote</button>}
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3 mb-4">
+          <div><label className="field-label">Eyebrow</label><input className="input" value={testimonials.eyebrow} onChange={(e) => setTestimonials({ ...testimonials, eyebrow: e.target.value })} /></div>
+          <div><label className="field-label">Heading</label><input className="input" value={testimonials.title} onChange={(e) => setTestimonials({ ...testimonials, title: e.target.value })} /></div>
+        </div>
+        <div className="space-y-4">
+          {testimonials.items.map((it, i) => (
+            <div key={i} className="grid gap-3 pb-4 border-b border-line-2 last:border-0 last:pb-0">
+              <div><label className="field-label">Quote</label><textarea className="input min-h-[72px]" value={it.quote} onChange={(e) => setTestItem(i, "quote", e.target.value)} /></div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div><label className="field-label">Author</label><input className="input" placeholder="e.g. Project Architect" value={it.author} onChange={(e) => setTestItem(i, "author", e.target.value)} /></div>
+                <div><label className="field-label">Role / company</label><input className="input" placeholder="e.g. Metro Manila design firm" value={it.role ?? ""} onChange={(e) => setTestItem(i, "role", e.target.value)} /></div>
+              </div>
+              {canWrite && <div><button className="btn btn-sm bg-[#FCE9E9] text-[#B23030]" onClick={() => removeTestItem(i)}>Remove quote</button></div>}
+            </div>
+          ))}
+          {!testimonials.items.length && <p className="text-steel text-[13.5px]">No quotes yet. Add one above.</p>}
+        </div>
+      </div>
+
+      {/* Partners — logo wall */}
+      <div className="panel mb-4.5">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-base">Partners — logo wall</h3>
+          {canWrite && <button className="btn btn-ghost btn-sm" onClick={addPartItem}>+ Add partner</button>}
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3 mb-4">
+          <div><label className="field-label">Eyebrow</label><input className="input" value={partners.eyebrow} onChange={(e) => setPartners({ ...partners, eyebrow: e.target.value })} /></div>
+          <div><label className="field-label">Heading</label><input className="input" value={partners.title} onChange={(e) => setPartners({ ...partners, title: e.target.value })} /></div>
+        </div>
+        <div className="space-y-4">
+          {partners.items.map((it, i) => (
+            <div key={i} className="grid sm:grid-cols-[140px_1fr] gap-3.5 pb-4 border-b border-line-2 last:border-0 last:pb-0">
+              <div>
+                <label className="field-label">Logo</label>
+                <div className="aspect-[3/2] rounded-lg overflow-hidden border border-line-2 bg-line-2/50 grid place-items-center">
+                  {it.image ? (
+                    <img src={imgUrl(it.image)!} alt="" className="w-full h-full object-contain" />
+                  ) : (
+                    <span className="font-mono text-[10.5px] uppercase tracking-wide text-steel text-center px-2">Name only</span>
+                  )}
+                </div>
+                {canWrite && (
+                  <div className="flex gap-2 mt-1.5">
+                    <label className="btn btn-ghost btn-sm cursor-pointer">
+                      {partImgBusy === i ? "Uploading…" : it.image ? "Replace" : "Upload"}
+                      <input type="file" accept="image/*" className="hidden" disabled={partImgBusy === i}
+                        onChange={(e) => { uploadPartImage(i, e.target.files?.[0]); e.target.value = ""; }} />
+                    </label>
+                    {it.image && <button className="btn btn-ghost btn-sm" onClick={() => setPartImage(i, null)}>Reset</button>}
+                  </div>
+                )}
+              </div>
+              <div className="grid gap-3 content-start">
+                <div><label className="field-label">Name</label><input className="input" placeholder="e.g. WORLDBEX" value={it.name} onChange={(e) => setPartName(i, e.target.value)} /></div>
+                {canWrite && <div><button className="btn btn-sm bg-[#FCE9E9] text-[#B23030]" onClick={() => removePartItem(i)}>Remove partner</button></div>}
+              </div>
+            </div>
+          ))}
+          {!partners.items.length && <p className="text-steel text-[13.5px]">No partners yet. Add one above.</p>}
+        </div>
+        <p className="text-steel text-[12px] mt-3">Upload a logo, or leave it as “Name only” to show the partner’s name as text in the wall.</p>
       </div>
 
       <div className="panel">

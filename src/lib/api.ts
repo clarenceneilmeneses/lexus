@@ -50,6 +50,34 @@ const DEFAULT_SETTINGS: SiteSettings = {
       { value: "#1", label: "PH expo" },
     ],
   },
+  testimonials: {
+    eyebrow: "What clients say",
+    title: "Trusted on the project floor.",
+    items: [
+      {
+        quote:
+          "Lexus has been our go-to supplier for finishing materials for years — consistent quality and they always come through on hard-to-find finishes.",
+        author: "Project Architect",
+        role: "Metro Manila design firm",
+      },
+      {
+        quote:
+          "Reliable lead times and a genuinely deep catalog. Their lamination and cut-to-size service saves us days on every fit-out.",
+        author: "Fit-out Contractor",
+        role: "Commercial interiors",
+      },
+    ],
+  },
+  partners: {
+    eyebrow: "Brands & partners",
+    title: "Trusted international brands.",
+    items: [
+      { name: "WORLDBEX", image: null },
+      { name: "Lexus Industrial", image: null },
+      { name: "Partner Brand", image: null },
+      { name: "Partner Brand", image: null },
+    ],
+  },
   contact: {
     email: "am.unlayao@lexusindustrial.com.ph",
     phone: "",
