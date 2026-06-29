@@ -36,7 +36,7 @@ const INTERIOR_IMG = [IMG.kitchen, IMG.dining, IMG.facade];
 export default function Home() {
   const { catalog } = useOutletContext<{ catalog: Catalog }>();
   const { settings, categories, products } = catalog;
-  const { hero, services, about, contact, interiors, credentials } = settings;
+  const { hero, services, about, contact, interiors, credentials, testimonials, partners } = settings;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const lineupRef = useRef<HTMLDivElement>(null);
@@ -92,20 +92,20 @@ export default function Home() {
           )}
         </div>
 
-        {/* controls row above the video */}
-        <div className="wrap mt-9 lg:mt-12 flex items-center justify-between">
-          <button
-            onClick={goFullscreen}
-            className="font-mono text-[11px] tracking-[0.16em] uppercase text-corp-grey hover:text-corp-navy transition-colors"
-          >
-            Fullscreen
-          </button>
+        {/* single expand-to-fullscreen control above the video */}
+        <div className="wrap mt-9 lg:mt-12 flex justify-end">
           <button
             onClick={goFullscreen}
             aria-label="Expand video to fullscreen"
-            className="w-8 h-8 grid place-items-center text-corp-grey hover:text-corp-navy transition-colors"
+            className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.16em] uppercase text-corp-grey hover:text-corp-navy transition-colors"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="w-5 h-5"><path d="M12 5v14M5 12h14" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+              <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+              <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+              <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+            </svg>
+            Fullscreen
           </button>
         </div>
 
@@ -191,7 +191,7 @@ export default function Home() {
                     src={imgUrl(it.image) || SERVICE_IMG[i % SERVICE_IMG.length]}
                     alt={it.title}
                     loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-90 group-hover:scale-[1.04] transition-all duration-700 ease-smooth"
+                    className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-[1.04] transition-all duration-700 ease-smooth"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
                   <div className="relative">
@@ -205,6 +205,10 @@ export default function Home() {
                 </article>
               );
             })}
+          </div>
+
+          <div className="flex justify-center mt-10 reveal">
+            <a href="#contact" className="pill-navy">Request a quote</a>
           </div>
         </div>
       </section>
@@ -222,14 +226,14 @@ export default function Home() {
                 <button
                   onClick={() => scrollLineup(-1)}
                   aria-label="Scroll products left"
-                  className="w-10 h-10 grid place-items-center rounded-full border border-line text-corp-navy text-xl leading-none hover:border-corp-orange hover:text-corp-orange transition-colors"
+                  className="w-10 h-10 grid place-items-center rounded-full border border-line text-corp-navy text-xl leading-none hover:border-flag hover:text-flag transition-colors"
                 >
                   ‹
                 </button>
                 <button
                   onClick={() => scrollLineup(1)}
                   aria-label="Scroll products right"
-                  className="w-10 h-10 grid place-items-center rounded-full border border-line text-corp-navy text-xl leading-none hover:border-corp-orange hover:text-corp-orange transition-colors"
+                  className="w-10 h-10 grid place-items-center rounded-full border border-line text-corp-navy text-xl leading-none hover:border-flag hover:text-flag transition-colors"
                 >
                   ›
                 </button>
@@ -268,7 +272,32 @@ export default function Home() {
           </div>
           <div className="pointer-events-none absolute right-0 top-0 bottom-4 w-16 bg-gradient-to-l from-white to-transparent hidden sm:block" />
         </div>
+
+        <div className="wrap flex justify-center mt-12 reveal">
+          <a href="#contact" className="pill-navy">Request a quote</a>
+        </div>
       </section>
+
+      {/* ============================ STORY — typographic interlude ============================ */}
+      {about.body && (
+        <section className="py-20 lg:py-28 section-light">
+          <div className="wrap">
+            <div className="max-w-3xl mx-auto text-center reveal">
+              <span className="eyebrow-corp justify-center">Our story</span>
+              <div className="mt-7 space-y-5">
+                {about.body.split(/\n\s*\n/).map((para, i) => (
+                  <p
+                    key={i}
+                    className="font-serif text-[clamp(20px,2.6vw,30px)] leading-[1.5] tracking-[-0.01em] text-corp-navy"
+                  >
+                    {para}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ============================ CATEGORIES — clean grid ============================ */}
       <section id="categories" className="py-16 lg:py-24 section-light scroll-mt-20">
@@ -330,7 +359,7 @@ export default function Home() {
                     src={imgUrl(it.image) || INTERIOR_IMG[i % INTERIOR_IMG.length]}
                     alt={it.title}
                     loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-[1.04] transition-all duration-700 ease-smooth"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-all duration-700 ease-smooth"
                   />
                   <div className={`absolute inset-0 bg-gradient-to-t from-black/70 ${big ? "via-black/5" : ""} to-transparent`} />
                   <div className={big ? "absolute left-6 bottom-6" : "absolute left-5 bottom-5"}>
@@ -343,6 +372,51 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ============================ TESTIMONIALS — navy quote band ============================ */}
+      {testimonials.items.length > 0 && (
+        <section className="py-20 lg:py-28 bg-corp-navy">
+          <div className="wrap">
+            <div className="text-center max-w-2xl mx-auto mb-12 reveal">
+              <span className="inline-flex items-center justify-center gap-2 font-mono text-[12px] tracking-[0.18em] uppercase text-accent-glow font-bold">
+                <span className="w-6 h-[3px] rounded-full bg-flag" />
+                {testimonials.eyebrow}
+              </span>
+              <h2 className="text-[clamp(28px,4vw,52px)] font-semibold tracking-tight text-white mt-3">{testimonials.title}</h2>
+            </div>
+
+            {testimonials.items.length === 1 ? (
+              <figure className="reveal max-w-3xl mx-auto text-center">
+                <span className="font-serif text-flag text-6xl leading-none">“</span>
+                <blockquote className="font-serif text-[clamp(22px,3vw,34px)] leading-[1.45] tracking-[-0.01em] text-white -mt-3">
+                  {testimonials.items[0].quote}
+                </blockquote>
+                <figcaption className="mt-7">
+                  <div className="font-display font-semibold text-white">{testimonials.items[0].author}</div>
+                  {testimonials.items[0].role && (
+                    <div className="font-mono text-[11px] tracking-[0.14em] uppercase text-accent-glow mt-1">{testimonials.items[0].role}</div>
+                  )}
+                </figcaption>
+              </figure>
+            ) : (
+              <div className="reveal grid gap-6 md:grid-cols-2">
+                {testimonials.items.map((t, i) => (
+                  <figure key={i} className="rounded-[28px] bg-white/5 border border-white/10 p-8 lg:p-10 flex flex-col">
+                    <span className="font-serif text-flag text-5xl leading-none">“</span>
+                    <blockquote className="font-serif text-[clamp(18px,2vw,24px)] leading-[1.5] text-white/90 -mt-2 flex-1">
+                      {t.quote}
+                    </blockquote>
+                    <figcaption className="mt-6 pt-5 border-t border-white/10">
+                      <div className="font-display font-semibold text-white">{t.author}</div>
+                      {t.role && <div className="font-mono text-[11px] tracking-[0.14em] uppercase text-accent-glow mt-1">{t.role}</div>}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ============================ CREDENTIALS — WORLDBEX trust band ============================ */}
       <section id="credentials" className="py-14 lg:py-20 section-light scroll-mt-20">
@@ -378,6 +452,38 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ============================ PARTNERS — logo wall ============================ */}
+      {partners.items.length > 0 && (
+        <section className="py-16 lg:py-20 bg-white border-y border-line">
+          <div className="wrap">
+            <div className="text-center max-w-2xl mx-auto mb-10 reveal">
+              <span className="eyebrow-corp justify-center">{partners.eyebrow}</span>
+              <h2 className="text-[clamp(22px,3vw,38px)] font-semibold tracking-tight text-corp-navy mt-3">{partners.title}</h2>
+            </div>
+            <div className="reveal flex flex-wrap items-center justify-center gap-x-10 gap-y-7 lg:gap-x-16">
+              {partners.items.map((p, i) =>
+                p.image ? (
+                  <img
+                    key={i}
+                    src={imgUrl(p.image)!}
+                    alt={p.name}
+                    loading="lazy"
+                    className="h-9 lg:h-11 w-auto object-contain opacity-60 hover:opacity-100 transition-opacity duration-500"
+                  />
+                ) : (
+                  <span
+                    key={i}
+                    className="font-display font-semibold text-[18px] lg:text-[22px] tracking-tight text-corp-navy/40 hover:text-corp-navy transition-colors"
+                  >
+                    {p.name}
+                  </span>
+                ),
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ============================ CONTACT — form + branches ============================ */}
       <section id="contact" className="py-20 lg:py-28 section-light scroll-mt-24">
         <div className="wrap">
@@ -391,7 +497,7 @@ export default function Home() {
             {/* info + interior image */}
             <div className="space-y-5">
               <div className="relative overflow-hidden rounded-3xl aspect-[16/10] bg-corp-navy">
-                <img src={IMG.dining} alt="Interior finished with Lexus materials" loading="lazy" className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                <img src={IMG.dining} alt="Interior finished with Lexus materials" loading="lazy" className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-smooth" />
                 <div className="absolute inset-0 bg-gradient-to-t from-corp-navy/80 to-transparent" />
                 <div className="absolute left-6 bottom-6 right-6">
                   <div className="font-mono text-[11px] tracking-[0.14em] uppercase text-accent-glow font-bold">Since 1995</div>
@@ -405,7 +511,7 @@ export default function Home() {
                     <p className="text-[13.5px] text-corp-grey leading-relaxed mt-1">{b.address}</p>
                     <div className="mt-2.5 space-y-1 font-mono text-[13px]">
                       {b.phone && <div className="text-corp-grey">☎ {b.phone}</div>}
-                      {b.email && <a href={`mailto:${b.email}`} className="block text-corp-navy hover:text-corp-orange break-all">✉ {b.email}</a>}
+                      {b.email && <a href={`mailto:${b.email}`} className="block text-corp-navy hover:text-flag break-all">✉ {b.email}</a>}
                     </div>
                   </div>
                 ))}

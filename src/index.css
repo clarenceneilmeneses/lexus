@@ -68,9 +68,11 @@ html { scrollbar-width: thin; scrollbar-color: rgba(120,128,150,.4) transparent;
   .eyebrow-corp {
     @apply inline-flex items-center gap-2 font-mono text-[12px] tracking-[0.18em] uppercase text-corp-orange font-bold;
   }
+  /* Flag-red bar is the system's single restrained accent (see also the
+     active SectionNav dot). The eyebrow text stays navy. */
   .eyebrow-corp::before {
     content: "";
-    @apply inline-block w-6 h-[3px] rounded-full bg-corp-orange;
+    @apply inline-block w-6 h-[3px] rounded-full bg-flag;
   }
   /* Navy section heading + orange underline (variant of .underline-gold) */
   .h-corp { @apply text-[clamp(28px,4vw,46px)] font-black mt-3 tracking-tight text-corp-navy; }

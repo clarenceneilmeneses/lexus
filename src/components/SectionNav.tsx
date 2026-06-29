@@ -45,7 +45,7 @@ export default function SectionNav({ sections }: { sections: Section[] }) {
               className={cn(
                 "rounded-full transition-all duration-300",
                 on
-                  ? "w-3 h-3 bg-corp-orange"
+                  ? "w-3 h-3 bg-flag"
                   : "w-2.5 h-2.5 bg-white/70 mix-blend-difference group-hover:scale-110"
               )}
             />
