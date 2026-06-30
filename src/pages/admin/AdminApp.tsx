@@ -105,16 +105,15 @@ export default function AdminApp() {
         )}
       >
         {/* Brand row + collapse toggle */}
-        <div className={cn("h-[60px] flex items-center border-b border-white/10 flex-none", collapsed ? "md:justify-center md:px-2 px-5 justify-between" : "justify-between px-5")}>
-          <div className={cn("flex items-center gap-2", collapsed && "md:hidden")}>
-            <Brand className="h-7" />
-            <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent-glow border border-accent-glow/40 rounded px-1.5 py-0.5">Admin</span>
+        <div className={cn("h-[64px] flex items-center gap-2 border-b border-white/10 flex-none", collapsed ? "md:justify-center md:px-2 px-4 justify-between" : "justify-between px-4")}>
+          <div className={cn("min-w-0", collapsed && "md:hidden")}>
+            <Brand className="h-6" />
           </div>
           <button
             onClick={() => setCollapsed((v) => !v)}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="hidden md:grid place-items-center w-8 h-8 rounded-lg text-[#c3cad6] hover:bg-white/10 hover:text-white transition-colors"
+            className="flex-none hidden md:grid place-items-center w-8 h-8 rounded-lg text-[#c3cad6] hover:bg-white/10 hover:text-white transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className={cn("w-[18px] h-[18px] transition-transform", collapsed && "rotate-180")}>
               <path d="M15 18l-6-6 6-6" />
@@ -124,7 +123,10 @@ export default function AdminApp() {
 
         {/* Greeting + live clock */}
         <div className={cn("border-b border-white/10 flex-none", collapsed ? "md:px-2 md:py-3 px-5 py-3.5" : "px-5 py-3.5")}>
-          <div className={cn("font-display font-semibold text-[14.5px] leading-tight", collapsed && "md:hidden")}>{greeting()}, {displayName}</div>
+          <div className={cn(collapsed && "md:hidden")}>
+            <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent-glow border border-accent-glow/40 rounded px-1.5 py-0.5">Admin</span>
+            <div className="font-display font-semibold text-[14.5px] leading-tight mt-2">{greeting()}, {displayName}</div>
+          </div>
           <Clock collapsed={collapsed} />
         </div>
 
