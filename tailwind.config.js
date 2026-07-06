@@ -21,7 +21,9 @@ export default {
         sand: "#F7F8FB",
         // Light corporate palette (landing page)
         corp: {
-          bg: "#f9f9fb",
+          // Slightly deeper than white so the light/white section alternation
+          // is actually visible on cheap panels.
+          bg: "#f3f4f8",
           navy: "#232c6d",
           navyD: "#1A2052",
           // Accent key (kept the `orange` name so existing `corp-orange`

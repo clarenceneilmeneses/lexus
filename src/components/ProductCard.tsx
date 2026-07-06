@@ -18,7 +18,7 @@ export default function ProductCard({ p }: { p: Product }) {
           loading="lazy"
           src={primaryImage(p)}
           alt={p.name}
-          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-smooth group-hover:scale-[1.04]"
+          className="desat w-full h-full object-cover transition-all duration-700 ease-smooth group-hover:scale-[1.04]"
         />
       </div>
       <div className="p-5 flex flex-col gap-1.5 flex-1">
