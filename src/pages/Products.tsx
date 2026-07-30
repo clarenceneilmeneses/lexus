@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { Link, useOutletContext, useSearchParams } from "react-router-dom";
+import { useOutletContext, useSearchParams } from "react-router-dom";
+import { Search, SearchX, X } from "lucide-react";
 import type { Catalog } from "../lib/types";
 import ProductCard from "../components/ProductCard";
 import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
+import CategoryIcon from "../components/CategoryIcon";
 import { usePagination } from "../hooks/usePagination";
-import { cn } from "../lib/utils";
 
 export default function Products() {
   const { catalog } = useOutletContext<{ catalog: Catalog }>();
@@ -35,50 +36,42 @@ export default function Products() {
         subtitle="Interior finishings, boards, panels, drywall, ceiling systems and more — sourced from trusted brands and ready to quote."
       />
 
-      <section className="py-12 lg:py-16">
-        <div className="wrap">
+      <section className="sec bg-white">
+        <div className="band-cards">
           {/* Search */}
-          <div className="flex items-center gap-2.5 bg-white border border-line rounded-full shadow-card px-5 py-3 mb-6 max-w-xl mx-auto">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-corp-grey">
-              <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" strokeLinecap="round" />
-            </svg>
+          <div className="flex items-center gap-2.5 card-ref px-4 py-3 mb-5 max-w-xl mx-auto focus-within:border-ref-band transition-colors">
+            <Search className="w-[18px] h-[18px] shrink-0 text-ref-body/60" strokeWidth={1.8} />
             <input
-              className="flex-1 outline-none text-[15px] bg-transparent placeholder:text-steel-2"
+              className="flex-1 outline-none text-[15px] bg-transparent text-ref-ink placeholder:text-ref-body/50"
               placeholder="Search products, brands, part numbers…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
             {q && (
-              <button onClick={() => setQ("")} className="text-steel-2 hover:text-corp-navy text-lg leading-none" aria-label="Clear">×</button>
+              <button onClick={() => setQ("")} className="text-ref-body/60 hover:text-ref-ink transition-colors" aria-label="Clear search">
+                <X className="w-4 h-4" strokeWidth={1.8} />
+              </button>
             )}
           </div>
 
           {/* Filter chips */}
-          <div className="flex gap-2 flex-wrap justify-center mb-8">
-            <button
-              className={cn(
-                "font-display font-semibold text-[13px] border rounded-full px-4 py-2 transition-colors",
-                cat === "all" ? "bg-corp-navy text-white border-corp-navy" : "bg-white border-line text-corp-navy hover:border-corp-navy"
-              )}
-              onClick={() => setCat("all")}
-            >
+          <div className="flex gap-2 flex-wrap justify-center mb-6">
+            <button className={cat === "all" ? "chip-ref-on" : "chip-ref"} onClick={() => setCat("all")}>
               All products
             </button>
             {catalog.categories.map((c) => (
               <button
                 key={c.id}
-                className={cn(
-                  "font-display font-semibold text-[13px] border rounded-full px-4 py-2 transition-colors",
-                  cat === c.slug ? "bg-corp-navy text-white border-corp-navy" : "bg-white border-line text-corp-navy hover:border-corp-navy"
-                )}
+                className={cat === c.slug ? "chip-ref-on" : "chip-ref"}
                 onClick={() => setCat(c.slug)}
               >
+                <CategoryIcon slug={c.slug} className="w-3.5 h-3.5 shrink-0" />
                 {c.name}
               </button>
             ))}
           </div>
 
-          <p className="font-mono text-[12px] tracking-wide uppercase text-corp-grey mb-6 text-center">
+          <p className="meta-ref mb-6 text-center">
             {filtered.length} {filtered.length === 1 ? "item" : "items"}
             {cat !== "all" && catName ? ` · ${catName}` : ""}
           </p>
@@ -91,11 +84,12 @@ export default function Products() {
               <Pagination page={page} totalPages={totalPages} onPage={setPage} />
             </>
           ) : (
-            <div className="bg-white border border-line rounded-3xl text-center py-16">
-              <h3 className="text-xl font-semibold tracking-tight mb-1.5">No matches</h3>
-              <p className="text-corp-grey">
+            <div className="card-ref text-center py-16 px-6">
+              <SearchX className="w-8 h-8 mx-auto text-ref-body/40 mb-4" strokeWidth={1.5} />
+              <h3 className="h-card text-ref-ink mb-1.5">No matches</h3>
+              <p className="copy">
                 Try a different keyword or{" "}
-                <button onClick={() => { setQ(""); setCat("all"); }} className="text-corp-orange font-semibold hover:underline">
+                <button onClick={() => { setQ(""); setCat("all"); }} className="link-ref !text-[inherit]">
                   clear the filters
                 </button>.
               </p>

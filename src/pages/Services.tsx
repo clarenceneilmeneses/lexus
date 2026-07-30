@@ -1,4 +1,5 @@
 import { Link, useOutletContext } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import type { Catalog } from "../lib/types";
 import PageHeader from "../components/PageHeader";
 
@@ -21,33 +22,33 @@ export default function Services() {
         subtitle="More than a supplier — we finish and fabricate so panels arrive on site ready to install."
       />
 
-      <section className="py-16 lg:py-24 section-light">
-        <div className="wrap reveal grid gap-5 sm:grid-cols-2">
+      <section className="sec bg-white">
+        <div className="band-cards reveal grid gap-5 sm:grid-cols-2">
           {s.items.map((it, i) => (
-            <div key={i} className="group bg-white border border-line rounded-3xl p-8 hover:border-corp-orange hover:shadow-lift transition-all duration-300">
-              <span className="font-mono text-[13px] text-corp-orange font-bold">{String(i + 1).padStart(2, "0")}</span>
-              <h3 className="font-display font-semibold text-[22px] tracking-tight text-corp-navy mt-4 mb-2 leading-tight">{it.title}</h3>
-              <p className="text-[14px] text-corp-grey leading-relaxed">{it.body}</p>
+            <div key={i} className="card-ref p-8 hover:border-ref-band transition-colors">
+              <span className="num text-[13px] text-ref-accent">{String(i + 1).padStart(2, "0")}</span>
+              <h3 className="h-card text-ref-ink mt-4 mb-2">{it.title}</h3>
+              <p className="copy-sm">{it.body}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Process */}
-      <section className="py-16 lg:py-24 bg-white border-y border-line">
-        <div className="wrap">
-          <div className="reveal mb-12 text-center max-w-2xl mx-auto">
-            <span className="eyebrow-corp justify-center">How it works</span>
-            <h2 className="text-[clamp(28px,4vw,48px)] font-semibold tracking-tight text-corp-navy mt-3">From spec to site in four steps.</h2>
+      <section className="sec bg-ref-off border-y border-ref-hair">
+        <div className="band">
+          <div className="reveal mb-12 text-center">
+            <span className="eyebrow-rule center">How it works</span>
+            <h2 className="h-sec text-ref-ink mt-4">From spec to site in four steps.</h2>
           </div>
           <div className="reveal grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map(([title, body], i) => (
-              <div key={i} className="relative bg-corp-bg border border-line rounded-3xl p-6">
-                <div className="font-display font-black text-[44px] leading-none text-corp-soft">{String(i + 1).padStart(2, "0")}</div>
-                <h3 className="font-display font-semibold text-[17px] tracking-tight text-corp-navy mt-3 mb-2">{title}</h3>
-                <p className="text-[13.5px] text-corp-grey leading-relaxed">{body}</p>
+              <div key={i} className="relative card-ref p-6">
+                <div className="num text-[40px] leading-none text-ref-hair">{String(i + 1).padStart(2, "0")}</div>
+                <h3 className="h-card text-ref-ink mt-3 mb-2">{title}</h3>
+                <p className="copy-sm">{body}</p>
                 {i < STEPS.length - 1 && (
-                  <span className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 text-corp-orange font-bold z-10">→</span>
+                  <ArrowRight className="hidden lg:block absolute -right-[13px] top-1/2 -translate-y-1/2 w-5 h-5 text-ref-accent bg-ref-off z-10" strokeWidth={1.8} />
                 )}
               </div>
             ))}
@@ -55,14 +56,16 @@ export default function Services() {
         </div>
       </section>
 
-      <section className="py-16 lg:py-24 section-light">
-        <div className="wrap">
-          <div className="reveal relative overflow-hidden bg-corp-navy text-white rounded-[28px] p-10 lg:p-14 flex items-center justify-between gap-6 flex-wrap">
+      <section className="sec bg-white">
+        <div className="band-cards">
+          <div className="reveal bg-ref-band text-white p-10 lg:p-14 flex items-center justify-between gap-6 flex-wrap">
             <div>
-              <h2 className="text-[clamp(24px,3vw,38px)] font-semibold tracking-tight leading-tight">Let's talk about your requirements.</h2>
-              <p className="text-white/75 mt-2 text-lg">Bulk orders, sourcing, or recurring supply — we're ready.</p>
+              <h2 className="h-sec">Let's talk about your requirements.</h2>
+              <p className="copy !text-white/75 mt-3">Bulk orders, sourcing, or recurring supply — we're ready.</p>
             </div>
-            <Link to="/contact" className="pill bg-white text-corp-navy hover:bg-accent-soft shrink-0">Get in touch</Link>
+            <Link to="/contact" className="btn-ref shrink-0 bg-white border-white text-ref-band hover:bg-ref-off">
+              Get in touch
+            </Link>
           </div>
         </div>
       </section>

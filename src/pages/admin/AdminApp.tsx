@@ -1,5 +1,9 @@
-import { useState, useEffect, type JSX } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import {
+  LayoutDashboard, Boxes, LayoutGrid, MessageSquare, PenLine, Users, ScrollText,
+  Settings, ChevronLeft, ExternalLink, LogOut, Menu, type LucideIcon,
+} from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useCatalog } from "../../hooks/useCatalog";
 import { Brand } from "../../components/layout/Header";
@@ -17,22 +21,16 @@ import SettingsPanel from "./SettingsPanel";
 
 type Tab = "dashboard" | "products" | "categories" | "inquiries" | "content" | "users" | "logs" | "settings";
 
-const icon = (d: string) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]">
-    <path d={d} />
-  </svg>
-);
-
-// area=null → visible to everyone signed in (read-only ok). area set → admin-only items.
-const NAV: { key: Tab; label: string; icon: JSX.Element; adminOnly?: boolean }[] = [
-  { key: "dashboard", label: "Dashboard", icon: icon("M3 13h8V3H3v10zM13 21h8V11h-8v10zM13 3v6h8V3h-8zM3 21h8v-6H3v6z") },
-  { key: "products", label: "Products", icon: icon("M21 16V8a2 2 0 00-1-1.7l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.7l7 4a2 2 0 002 0l7-4A2 2 0 0021 16zM3.3 7L12 12l8.7-5M12 22V12") },
-  { key: "categories", label: "Categories", icon: icon("M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z") },
-  { key: "inquiries", label: "Inquiries", icon: icon("M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z") },
-  { key: "content", label: "Content", icon: icon("M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z") },
-  { key: "users", label: "Users", icon: icon("M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8"), adminOnly: true },
-  { key: "logs", label: "Activity log", icon: icon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"), adminOnly: true },
-  { key: "settings", label: "Settings", icon: icon("M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"), adminOnly: true },
+// adminOnly=false → visible to everyone signed in (read-only ok).
+const NAV: { key: Tab; label: string; icon: LucideIcon; adminOnly?: boolean }[] = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "products", label: "Products", icon: Boxes },
+  { key: "categories", label: "Categories", icon: LayoutGrid },
+  { key: "inquiries", label: "Inquiries", icon: MessageSquare },
+  { key: "content", label: "Content", icon: PenLine },
+  { key: "users", label: "Users", icon: Users, adminOnly: true },
+  { key: "logs", label: "Activity log", icon: ScrollText, adminOnly: true },
+  { key: "settings", label: "Settings", icon: Settings, adminOnly: true },
 ];
 
 const ROLE_PILL: Record<Role, string> = {
@@ -77,17 +75,18 @@ export default function AdminApp() {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
   function NavButton({ n }: { n: (typeof NAV)[number] }) {
+    const Icon = n.icon;
     return (
       <button
         onClick={() => { setTab(n.key); setNavOpen(false); }}
         title={collapsed ? n.label : undefined}
         className={cn(
-          "flex items-center gap-3 w-full rounded-xl font-display font-semibold text-[14px] transition-colors",
+          "flex items-center gap-3 w-full rounded-xl font-medium text-[14px] transition-colors",
           collapsed ? "md:justify-center md:px-0 px-3.5 py-2.5" : "px-3.5 py-2.5",
           tab === n.key ? "bg-accent-glow text-corp-navy" : "text-[#c3cad6] hover:bg-white/10 hover:text-white"
         )}
       >
-        <span className="flex-none">{n.icon}</span>
+        <Icon className="w-[18px] h-[18px] flex-none" strokeWidth={1.8} />
         <span className={cn(collapsed && "md:hidden")}>{n.label}</span>
       </button>
     );
@@ -115,9 +114,7 @@ export default function AdminApp() {
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className="flex-none hidden md:grid place-items-center w-8 h-8 rounded-lg text-[#c3cad6] hover:bg-white/10 hover:text-white transition-colors"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className={cn("w-[18px] h-[18px] transition-transform", collapsed && "rotate-180")}>
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
+            <ChevronLeft className={cn("w-[18px] h-[18px] transition-transform", collapsed && "rotate-180")} strokeWidth={1.9} />
           </button>
         </div>
 
@@ -141,17 +138,19 @@ export default function AdminApp() {
               <span className={cn("font-mono text-[10px] uppercase tracking-[0.14em] border rounded px-1.5 py-0.5", ROLE_PILL[role])}>{role}</span>
               <span className="font-mono text-[11px] text-[#aeb6c2] truncate">{session.user.email}</span>
             </div>
-            <Link to="/" className="block px-2 font-mono text-[12px] text-[#aeb6c2] hover:text-accent-glow mb-2">View site ↗</Link>
+            <Link to="/" className="flex items-center gap-1.5 px-2 font-mono text-[12px] text-[#aeb6c2] hover:text-accent-glow mb-2.5">
+              View site <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.8} />
+            </Link>
             <button className="btn btn-sm bg-white text-corp-navy w-full justify-center" onClick={signOut}>Sign out</button>
           </div>
           {/* Collapsed footer — icons only (desktop) */}
           <div className={cn("flex-col items-center gap-2 hidden", collapsed && "md:flex")}>
             <span className={cn("font-mono text-[10px] uppercase w-8 h-8 grid place-items-center rounded-lg", ROLE_PILL[role])} title={`Role: ${role}`}>{role[0]}</span>
             <Link to="/" title="View site" className="grid place-items-center w-9 h-9 rounded-lg text-[#aeb6c2] hover:bg-white/10 hover:text-white">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" /></svg>
+              <ExternalLink className="w-[18px] h-[18px]" strokeWidth={1.8} />
             </Link>
             <button onClick={signOut} title="Sign out" className="grid place-items-center w-9 h-9 rounded-lg bg-white text-corp-navy">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" /></svg>
+              <LogOut className="w-[18px] h-[18px]" strokeWidth={1.9} />
             </button>
           </div>
         </div>
@@ -164,9 +163,13 @@ export default function AdminApp() {
       <div className="flex-1 min-w-0">
         {/* mobile top bar */}
         <div className="md:hidden h-[56px] bg-corp-navy text-white flex items-center justify-between px-4">
-          <button className="text-2xl" aria-label="Open menu" onClick={() => setNavOpen(true)}>☰</button>
-          <span className="font-display font-bold">Admin</span>
-          <button className="font-mono text-[12px]" onClick={signOut}>Sign out</button>
+          <button aria-label="Open menu" onClick={() => setNavOpen(true)}>
+            <Menu className="w-6 h-6" strokeWidth={1.8} />
+          </button>
+          <span className="font-semibold">Admin</span>
+          <button className="font-mono text-[12px] flex items-center gap-1.5" onClick={signOut}>
+            <LogOut className="w-4 h-4" strokeWidth={1.8} /> Sign out
+          </button>
         </div>
 
         <div className="max-w-[1100px] mx-auto px-5 lg:px-8 py-7">

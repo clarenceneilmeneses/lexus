@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useOutletContext, useParams } from "react-router-dom";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import type { Catalog } from "../lib/types";
 import { cn, imgUrl, placeholder } from "../lib/utils";
 import ProductCard from "../components/ProductCard";
+import CategoryIcon from "../components/CategoryIcon";
 
 export default function ProductDetail() {
   const { catalog } = useOutletContext<{ catalog: Catalog }>();
@@ -12,10 +14,12 @@ export default function ProductDetail() {
 
   if (!p) {
     return (
-      <section className="py-24"><div className="wrap text-center">
-        <div className="font-mono text-corp-orange text-sm">NOT FOUND</div>
-        <h2 className="text-3xl font-semibold tracking-tight mt-2 mb-4">Product not found</h2>
-        <Link to="/products" className="pill-orange">← Back to catalog</Link>
+      <section className="sec bg-ref-off"><div className="band py-16 text-center">
+        <div className="font-mono text-[12px] uppercase tracking-[0.14em] text-ref-accent">Not found</div>
+        <h2 className="h-sec text-ref-ink mt-3 mb-6">Product not found</h2>
+        <Link to="/products" className="btn-ref-accent">
+          <ArrowLeft className="w-4 h-4" strokeWidth={1.9} /> Back to catalog
+        </Link>
       </div></section>
     );
   }
@@ -27,36 +31,37 @@ export default function ProductDetail() {
     .slice(0, 4);
 
   return (
-    <section className="py-12 lg:py-16">
-      <div className="wrap">
+    <section className="sec bg-white">
+      <div className="band-cards">
         {/* Breadcrumb */}
-        <div className="font-mono text-[12px] text-corp-grey mb-6 flex flex-wrap gap-1.5 items-center">
-          <Link to="/products" className="hover:text-corp-orange transition-colors">Catalog</Link>
+        <nav aria-label="Breadcrumb" className="font-mono text-[12px] text-ref-body/70 mb-7 flex flex-wrap gap-1 items-center">
+          <Link to="/products" className="hover:text-ref-accent transition-colors">Catalog</Link>
           {cat && (
             <>
-              <span className="text-line">/</span>
-              <Link to={`/products?cat=${cat.slug}`} className="hover:text-corp-orange transition-colors">{cat.name}</Link>
+              <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-50" strokeWidth={2} />
+              <Link to={`/products?cat=${cat.slug}`} className="hover:text-ref-accent transition-colors">{cat.name}</Link>
             </>
           )}
-          <span className="text-line">/</span>
-          <span className="text-corp-navy">{p.name}</span>
-        </div>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-50" strokeWidth={2} />
+          <span className="text-ref-ink">{p.name}</span>
+        </nav>
 
-        <div className="grid gap-10 lg:gap-14 lg:grid-cols-[1.05fr_1fr]">
+        <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1.05fr_1fr]">
           {/* Gallery */}
           <div>
-            <div className="aspect-square bg-white border border-line rounded-3xl overflow-hidden shadow-card">
+            <div className="aspect-square card-ref overflow-hidden">
               <img src={gallery[idx]} alt={p.name} className="w-full h-full object-cover" />
             </div>
             {gallery.length > 1 && (
-              <div className="flex gap-2.5 mt-3 flex-wrap">
+              <div className="flex gap-2.5 mt-2.5 flex-wrap">
                 {gallery.map((g, i) => (
                   <button
                     key={i}
                     onClick={() => setIdx(i)}
+                    aria-label={`View image ${i + 1}`}
                     className={cn(
-                      "w-[74px] h-[74px] border rounded-2xl overflow-hidden bg-white transition-all",
-                      i === idx ? "border-corp-orange border-2" : "border-line hover:border-corp-navy"
+                      "w-[74px] h-[74px] border overflow-hidden bg-white transition-colors",
+                      i === idx ? "border-ref-accent" : "border-ref-hair hover:border-ref-band"
                     )}
                   >
                     <img src={g} alt="" className="w-full h-full object-cover" />
@@ -68,24 +73,30 @@ export default function ProductDetail() {
 
           {/* Info */}
           <div>
-            {cat && <Link to={`/products?cat=${cat.slug}`} className="tag hover:border-corp-orange hover:text-corp-orange transition-colors">{cat.name}</Link>}
-            <h1 className="text-[clamp(28px,4vw,44px)] font-semibold tracking-tight mt-3 mb-2 leading-tight text-corp-navy">{p.name}</h1>
-            <div className="font-mono text-[13px] text-corp-orange mb-4">
-              {p.brand ? `${p.brand} · ` : ""}MODEL {p.model || "—"}
+            {cat && (
+              <Link
+                to={`/products?cat=${cat.slug}`}
+                className="inline-flex items-center gap-1.5 meta-ref border border-ref-hair px-2.5 py-1.5 hover:border-ref-band hover:text-ref-band transition-colors"
+              >
+                <CategoryIcon slug={cat.slug} className="w-3.5 h-3.5" />
+                {cat.name}
+              </Link>
+            )}
+            <h1 className="h-hero text-ref-ink mt-4 mb-2">{p.name}</h1>
+            <div className="font-mono text-[13px] uppercase tracking-[0.06em] text-ref-accent mb-5">
+              {p.brand ? `${p.brand} · ` : ""}Model {p.model || "—"}
             </div>
-            {p.short_description && <p className="text-base text-corp-grey leading-relaxed">{p.short_description}</p>}
+            {p.short_description && <p className="copy">{p.short_description}</p>}
 
             {p.specs.length > 0 && (
-              <div className="mt-6 border border-line rounded-3xl overflow-hidden shadow-card">
-                <div className="font-mono text-[11px] tracking-[0.1em] uppercase text-corp-grey bg-corp-bg px-4 py-2.5 border-b border-line">
-                  Specifications
-                </div>
+              <div className="mt-7 card-ref overflow-hidden">
+                <div className="meta-ref bg-ref-off px-4 py-3 border-b border-ref-hair">Specifications</div>
                 <table className="w-full border-collapse">
                   <tbody>
                     {p.specs.map((s, i) => (
-                      <tr key={i} className="border-b border-line last:border-0">
-                        <td className="font-mono text-[12.5px] text-corp-grey bg-corp-bg/60 px-4 py-3 w-[42%]">{s.label}</td>
-                        <td className="text-sm px-4 py-3 text-corp-navy">{s.value}</td>
+                      <tr key={i} className="border-b border-ref-hair last:border-0">
+                        <td className="font-mono text-[12.5px] text-ref-body bg-ref-off/60 px-4 py-3 w-[42%] align-top">{s.label}</td>
+                        <td className="text-[14px] px-4 py-3 text-ref-ink">{s.value}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -93,15 +104,15 @@ export default function ProductDetail() {
               </div>
             )}
 
-            <div className="flex items-center gap-4 mt-7 flex-wrap">
-              <span className="font-mono text-lg font-bold text-corp-navy">{p.price_text || "Request a quote"}</span>
-              <Link to={`/contact?product=${encodeURIComponent(p.name)}`} className="pill-orange">Request a quote</Link>
+            <div className="flex items-center gap-5 mt-8 flex-wrap">
+              {p.price_text && <span className="num text-[19px] text-ref-ink">{p.price_text}</span>}
+              <Link to={`/contact?product=${encodeURIComponent(p.name)}`} className="btn-ref-accent">Request a quote</Link>
             </div>
 
             {p.description && (
-              <div className="border-t border-line pt-5 mt-7">
-                <h4 className="font-mono text-[12px] tracking-[0.1em] text-corp-grey uppercase mb-2.5">Description</h4>
-                <p className="text-corp-grey leading-relaxed whitespace-pre-wrap">{p.description}</p>
+              <div className="border-t border-ref-hair pt-6 mt-8">
+                <h4 className="meta-ref mb-3">Description</h4>
+                <p className="copy whitespace-pre-wrap">{p.description}</p>
               </div>
             )}
           </div>
@@ -112,10 +123,10 @@ export default function ProductDetail() {
           <div className="mt-20">
             <div className="flex items-end justify-between gap-4 flex-wrap mb-8">
               <div>
-                <span className="eyebrow-corp">Same category</span>
-                <h2 className="text-[clamp(22px,2.6vw,32px)] font-semibold tracking-tight text-corp-navy mt-2">Related products</h2>
+                <span className="eyebrow-rule start">Same category</span>
+                <h2 className="h-sec text-ref-ink mt-3">Related products</h2>
               </div>
-              {cat && <Link to={`/products?cat=${cat.slug}`} className="pill-outline">View all</Link>}
+              {cat && <Link to={`/products?cat=${cat.slug}`} className="link-ref">View all</Link>}
             </div>
             <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(258px,1fr))" }}>
               {related.map((r) => <ProductCard key={r.id} p={r} />)}

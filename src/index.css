@@ -4,8 +4,8 @@
 
 :root { color-scheme: light; }
 html { scroll-behavior: smooth; }
-body { @apply bg-paper text-ink font-body antialiased; margin: 0; }
-h1, h2, h3, h4 { @apply font-display; letter-spacing: -0.02em; line-height: 1.04; }
+body { @apply bg-white text-ref-ink font-body antialiased; margin: 0; }
+h1, h2, h3, h4 { @apply font-display font-semibold; letter-spacing: -0.022em; line-height: 1.15; }
 
 /* Selection + scrollbar polish */
 ::selection { background: #232c6d; color: #fff; }
@@ -91,28 +91,165 @@ html { scrollbar-width: thin; scrollbar-color: rgba(120,128,150,.4) transparent;
   .pill-orange { @apply pill bg-corp-orange text-white hover:bg-corp-orangeD; }
   .pill-navy { @apply pill bg-corp-navy text-white hover:bg-corp-navyD; }
   .pill-outline { @apply pill border border-corp-navy/25 text-corp-navy hover:border-corp-navy; }
+
+  /* =========================================================================
+     EDITORIAL REFERENCE LANGUAGE (multi-line.com.ph)
+     Flat, square-cornered, 70px section rhythm, DM Sans throughout with DM
+     Mono for numerics, and one action colour. Used across every page.
+     ========================================================================= */
+
+  /* 1300px band for headings/text, 1250px for card rows — as in the source. */
+  .band { @apply max-w-band mx-auto px-6 sm:px-8; }
+  .band-cards { @apply max-w-cards mx-auto px-6 sm:px-8; }
+  /* Every marketing section breathes on 70px. */
+  .sec { @apply py-[52px] lg:py-[70px]; }
+
+  /* Uppercase eyebrow flanked by 45×1px rules (.small-text-p-3 + .straight-line-*)
+     `max-w-full` is load-bearing: inside an `items-center` flex column the span
+     would otherwise size to max-content — the whole label on one unwrapped line
+     plus 90px of rules — and push the page into horizontal overflow on phones. */
+  .eyebrow-rule {
+    @apply flex items-center gap-2.5 max-w-full font-ui font-medium text-[13px] sm:text-[14px]
+           uppercase tracking-[0.08em] leading-tight text-ref-band;
+  }
+  .eyebrow-rule::before, .eyebrow-rule::after {
+    content: "";
+    @apply inline-block w-6 sm:w-[45px] h-px shrink-0 bg-current opacity-60;
+  }
+  .eyebrow-rule.center { @apply justify-center; }
+  /* Left-aligned variant drops the leading rule. */
+  .eyebrow-rule.start::before { @apply hidden; }
+  .eyebrow-rule.on-dark { @apply text-white; }
+
+  /* Heading scale — the reference's sizes (h1 54 / h2 32 / h3 22–26), set in
+     DM Sans. A geometric sans needs more weight and tighter tracking than the
+     serif it replaces to hold the same presence at display sizes. */
+  .h-hero { @apply font-display font-semibold text-[clamp(32px,5.2vw,54px)] leading-[1.12] tracking-[-0.025em]; }
+  .h-sec  { @apply font-display font-semibold text-[clamp(25px,3.4vw,38px)] leading-[1.15] tracking-[-0.022em]; }
+  .h-card { @apply font-display font-semibold text-[clamp(17px,1.6vw,21px)] leading-[1.25] tracking-[-0.015em]; }
+  /* Body copy: 18px / 1.6, warm grey. DM Sans needs no extra letter-spacing. */
+  .copy { @apply text-[16px] sm:text-[17px] leading-[1.6] text-ref-body; }
+  .copy-sm { @apply text-[14.5px] leading-[1.6] text-ref-body; }
+  /* Numerics — stat values, IDs, timestamps, coordinates. */
+  .num { @apply font-mono font-medium tabular-nums tracking-[-0.01em]; }
+
+  /* Flat, square buttons — DM Sans 600 / 16px. */
+  .btn-ref {
+    @apply inline-flex items-center justify-center gap-2 font-ui font-semibold text-[15px] sm:text-[16px]
+           leading-none px-7 py-4 border transition-colors duration-200;
+  }
+  .btn-ref-accent { @apply btn-ref bg-ref-accent border-ref-accent text-white hover:bg-ref-accentD hover:border-ref-accentD; }
+  .btn-ref-band   { @apply btn-ref bg-ref-band border-ref-band text-white hover:bg-ref-bandD hover:border-ref-bandD; }
+  .btn-ref-ghost  { @apply btn-ref bg-transparent border-white/70 text-white hover:bg-white hover:text-ref-ink; }
+  .btn-ref-out    { @apply btn-ref bg-transparent border-ref-band text-ref-band hover:bg-ref-band hover:text-white; }
+
+  /* Text link — indigo, underlined, amber-free hover on the accent. */
+  .link-ref {
+    @apply inline-flex items-center gap-1.5 font-ui font-semibold text-[15px] text-ref-band underline
+           underline-offset-4 decoration-1 hover:text-ref-accent transition-colors;
+  }
+
+  /* Flat surfaces — square corners, hairline border, no shadow. */
+  .card-ref { @apply bg-white border border-ref-hair; }
+  .card-ref-soft { @apply bg-ref-off border border-ref-hair; }
+  /* Filter/selection chip */
+  .chip-ref {
+    @apply inline-flex items-center gap-1.5 font-ui font-medium text-[13.5px] leading-none
+           border border-ref-hair bg-white text-ref-ink px-4 py-2.5 transition-colors
+           hover:border-ref-band;
+  }
+  .chip-ref-on { @apply chip-ref bg-ref-band border-ref-band text-white hover:border-ref-band; }
+  /* Small uppercase micro-label (spec sheets, meta rows) */
+  .meta-ref { @apply font-mono text-[11.5px] uppercase tracking-[0.09em] text-ref-body/75; }
+
+  /* Flat inputs to match (square, hairline, no shadow). */
+  .input-ref {
+    @apply w-full bg-white border border-ref-hair px-4 py-3 text-[15px] text-ref-ink outline-none
+           transition-colors placeholder:text-ref-body/50 focus:border-ref-band;
+  }
+  .label-ref { @apply block font-ui font-semibold text-[12.5px] uppercase tracking-[0.08em] text-ref-body mb-1.5; }
+}
+
+/* Edge-to-edge horizontal scroller whose first card still lines up with the
+   1250px content band. Tailwind silently drops `px-[max(...,calc(...))]`, so
+   this is written as plain CSS where the syntax is under our control.
+   `scroll-padding` must track `padding`: in a mandatory snap container the
+   first `snap-start` child otherwise snaps flush to the border, scrolling the
+   lead-in padding out of view and breaking the alignment. */
+.lineup-pad {
+  @apply px-6 sm:px-8;
+  scroll-padding-left: 1.5rem;
+}
+@media (min-width: 640px) {
+  .lineup-pad { scroll-padding-left: 2rem; }
+}
+@media (min-width: 1330px) {
+  .lineup-pad {
+    padding-left: calc((100% - 1250px) / 2);
+    padding-right: calc((100% - 1250px) / 2);
+    scroll-padding-left: calc((100% - 1250px) / 2);
+  }
+}
+
+/* Rows of cards: 3-up on desktop, and a trailing remainder of 1–2 items
+   spreads to fill its own row (the source's 1/3·1/3·1/3 + 1/2·1/2 rhythm).
+   The count comes in as --cols so one class serves every row length. */
+.row-cols { @apply grid grid-cols-1 sm:grid-cols-2 gap-5; }
+@media (min-width: 1024px) {
+  .row-cols { grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); }
+}
+
+/* -------- "dany" image card: hover lifts the photo and expands the blurb ----
+   Ported from the reference's Avada imageframe style. The title always shows;
+   the description is collapsed to zero line-height and expands on hover while
+   the photo slides up 60px behind it. Touch devices, which never hover, get
+   the description shown permanently (see the hover-capability query below). */
+.dany { @apply relative block overflow-hidden bg-ref-band; }
+.dany > img {
+  @apply absolute inset-0 w-full h-full object-cover;
+  /* The reference recesses the photo to 0.8; over a navy card that tints bright
+     photos visibly blue, so we sit a little higher and let the scrim do the
+     contrast work instead. */
+  opacity: 0.92;
+  transition: transform 0.35s, opacity 0.35s;
+  backface-visibility: hidden;
+}
+.dany:hover > img { opacity: 1; }
+.dany-scrim { @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/5 pointer-events-none; }
+.dany-cap { @apply absolute inset-0 flex flex-col justify-end text-white pointer-events-none; }
+.dany-cap-title { @apply p-6 lg:p-7; }
+.dany-cap-text {
+  @apply px-6 lg:px-7 text-[14.5px] tracking-[0.015em] text-white/85;
+  line-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  transition: line-height 0.35s ease, padding 0.35s, opacity 0.35s;
+}
+@media (hover: hover) {
+  .dany:hover > img { transform: translate3d(0, -60px, 0); }
+  .dany:hover .dany-cap-text { line-height: 1.6; opacity: 1; @apply pt-0 pb-6 lg:pb-7; }
+}
+/* No hover available → don't hide copy behind an interaction that can't happen. */
+@media (hover: none) {
+  .dany-cap-title { @apply pb-2; }
+  .dany-cap-text { line-height: 1.6; opacity: 1; @apply pb-6; }
 }
 
 /* =============================================================
-   ADMIN UI — SF Pro, lighter weights, minimalist (scoped to .admin-ui)
-   Public marketing pages are unaffected; only the admin + login opt in.
+   ADMIN UI — same DM Sans system as the public site, at lighter weights and
+   softer radii (scoped to .admin-ui). Numerics stay in DM Mono.
    Higher specificity (.admin-ui .x) lets these win over Tailwind utilities.
    ============================================================= */
 .admin-ui {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
-    "Inter", "Segoe UI", system-ui, sans-serif;
+  @apply font-body;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0;
 }
-/* Drop the Archivo display face inside admin — use the SF Pro stack everywhere */
-.admin-ui .font-display,
-.admin-ui .btn,
-.admin-ui h1, .admin-ui h2, .admin-ui h3, .admin-ui h4 { font-family: inherit; }
-
 .admin-ui h1, .admin-ui h2, .admin-ui h3, .admin-ui h4 {
   font-weight: 600;
-  letter-spacing: -0.018em;
+  letter-spacing: -0.02em;
   line-height: 1.15;
 }
 /* Soften the heavy utility weights */

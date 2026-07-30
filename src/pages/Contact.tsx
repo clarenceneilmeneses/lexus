@@ -1,4 +1,5 @@
 import { useOutletContext, useSearchParams } from "react-router-dom";
+import { Clock, Mail, MapPin, Phone, type LucideIcon } from "lucide-react";
 import type { Catalog } from "../lib/types";
 import PageHeader from "../components/PageHeader";
 import ContactForm from "../components/ContactForm";
@@ -9,10 +10,15 @@ export default function Contact() {
   const [params] = useSearchParams();
   const product = params.get("product");
 
-  const InfoRow = ({ label, value, href }: { label: string; value: string; href?: string }) => (
-    <div className="bg-white border border-line rounded-2xl px-4 py-3.5 shadow-card">
-      <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-steel mb-0.5">{label}</div>
-      {href ? <a href={href} className="font-semibold hover:text-corp-orange transition-colors break-all">{value}</a> : <b className="font-semibold">{value}</b>}
+  const InfoRow = ({ icon: Icon, label, value, href }: { icon: LucideIcon; label: string; value: string; href?: string }) => (
+    <div className="card-ref px-5 py-4 flex gap-3.5 items-start">
+      <Icon className="w-[18px] h-[18px] shrink-0 mt-0.5 text-ref-accent" strokeWidth={1.7} />
+      <div className="min-w-0">
+        <div className="meta-ref mb-1">{label}</div>
+        {href
+          ? <a href={href} className="text-[15px] font-medium text-ref-ink hover:text-ref-accent transition-colors break-all">{value}</a>
+          : <span className="text-[15px] font-medium text-ref-ink">{value}</span>}
+      </div>
     </div>
   );
 
@@ -28,16 +34,16 @@ export default function Contact() {
         }
       />
 
-      <section className="py-14 lg:py-20">
-        <div className="wrap grid gap-10 lg:gap-14 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="grid gap-3 content-start">
-            <InfoRow label="Email" value={c.email} href={`mailto:${c.email}`} />
-            {c.phone && <InfoRow label="Phone" value={c.phone} href={`tel:${c.phone}`} />}
-            <InfoRow label="Hours" value={c.hours} />
-            <InfoRow label="Location" value={c.address} />
-            <div className="bg-corp-navy text-white rounded-2xl p-6 mt-2">
-              <div className="font-mono text-[11px] tracking-[0.14em] uppercase text-accent-glow font-bold">Since 1995</div>
-              <p className="text-[14px] text-white/75 mt-2 leading-relaxed">
+      <section className="sec bg-white">
+        <div className="band-cards grid gap-5 lg:gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="grid gap-4 content-start">
+            <InfoRow icon={Mail} label="Email" value={c.email} href={`mailto:${c.email}`} />
+            {c.phone && <InfoRow icon={Phone} label="Phone" value={c.phone} href={`tel:${c.phone}`} />}
+            <InfoRow icon={Clock} label="Hours" value={c.hours} />
+            <InfoRow icon={MapPin} label="Location" value={c.address} />
+            <div className="bg-ref-band text-white p-6 mt-1">
+              <div className="font-mono text-[11px] tracking-[0.12em] uppercase text-white/60">Since 1995</div>
+              <p className="copy-sm !text-white/80 mt-2">
                 Wholesale &amp; retail supply of modern interior finishings — trusted by the interior design industry.
               </p>
             </div>

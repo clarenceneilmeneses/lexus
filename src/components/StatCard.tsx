@@ -23,8 +23,9 @@ export function StatCard({
 }) {
   return (
     <div className="panel">
-      <div className={cn("font-display font-black text-[34px] leading-none", TONES[tone])}>{value}</div>
-      <div className="font-mono text-[11px] tracking-[0.1em] uppercase text-steel mt-2">{label}</div>
+      {/* Stat values are numerics → DM Mono, per the shared type system. */}
+      <div className={cn("num text-[30px] leading-none", TONES[tone])}>{value}</div>
+      <div className="font-mono text-[11px] tracking-[0.1em] uppercase text-steel mt-2.5">{label}</div>
       {hint && <div className="text-[12px] text-steel mt-1">{hint}</div>}
     </div>
   );

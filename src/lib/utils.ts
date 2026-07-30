@@ -19,9 +19,9 @@ export function placeholder(name: string, code?: string | null): string {
     <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#1B2738'/><stop offset='1' stop-color='#0E1726'/></linearGradient></defs>
     <rect width='600' height='450' fill='url(#g)'/>
     <g stroke='rgba(255,255,255,.06)'>${grid}</g>
-    <rect x='0' y='0' width='14' height='450' fill='#EA5A0B'/>
-    <text x='50%' y='47%' fill='#fff' font-family='Archivo,sans-serif' font-weight='900' font-size='120' text-anchor='middle'>${init}</text>
-    <text x='50%' y='62%' fill='#8A93A0' font-family='monospace' font-size='22' letter-spacing='3' text-anchor='middle'>${(code || "").toUpperCase()}</text>
+    <rect x='0' y='0' width='14' height='450' fill='#EA492E'/>
+    <text x='50%' y='47%' fill='#fff' font-family='DM Sans,system-ui,-apple-system,Segoe UI,Roboto,sans-serif' font-weight='700' font-size='120' text-anchor='middle'>${init}</text>
+    <text x='50%' y='62%' fill='#8A93A0' font-family='DM Mono,ui-monospace,monospace' font-size='22' letter-spacing='3' text-anchor='middle'>${(code || "").toUpperCase()}</text>
   </svg>`;
   return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
 }

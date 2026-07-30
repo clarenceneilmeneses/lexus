@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ChevronDown, ChevronRight, ChevronUp, Trash2 } from "lucide-react";
 import type { Catalog, CredentialsSettings, InteriorsSettings, PartnersSettings, ServicesSettings } from "../../lib/types";
 import { deleteSiteImages, saveSettings, uploadSiteImage } from "../../lib/api";
 import { imgUrl } from "../../lib/utils";
@@ -254,9 +255,7 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
           className="w-full flex items-start gap-3 text-left px-4 sm:px-5 py-3.5 hover:bg-[#F7F8FA] transition-colors"
         >
           <span className={`mt-0.5 flex-none w-7 h-7 grid place-items-center rounded-lg transition-colors ${isOpen ? "bg-corp-navy text-white" : "bg-[#EEF0F6] text-corp-navy"}`}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={`w-[15px] h-[15px] transition-transform ${isOpen ? "rotate-90" : ""}`}>
-              <path d="M9 6l6 6-6 6" />
-            </svg>
+            <ChevronRight className={`w-[15px] h-[15px] transition-transform ${isOpen ? "rotate-90" : ""}`} strokeWidth={2.2} />
           </span>
           <span className="flex-1 min-w-0">
             <span className="flex items-center gap-2 flex-wrap">
@@ -285,13 +284,13 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
           {canWrite && (
             <div className="flex items-center gap-0.5 flex-none">
               <button type="button" title="Move up" aria-label="Move up" disabled={i === 0} onClick={() => onMove(-1)} className={`${ctrl} text-steel hover:bg-line-2 disabled:hover:bg-transparent`}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[15px] h-[15px]"><path d="M18 15l-6-6-6 6" /></svg>
+                <ChevronUp className="w-[15px] h-[15px]" strokeWidth={2.2} />
               </button>
               <button type="button" title="Move down" aria-label="Move down" disabled={i === total - 1} onClick={() => onMove(1)} className={`${ctrl} text-steel hover:bg-line-2 disabled:hover:bg-transparent`}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[15px] h-[15px]"><path d="M6 9l6 6 6-6" /></svg>
+                <ChevronDown className="w-[15px] h-[15px]" strokeWidth={2.2} />
               </button>
               <button type="button" title={`Remove ${label}`} aria-label={`Remove ${label}`} onClick={onRemove} className={`${ctrl} text-[#B23030] hover:bg-[#FCE9E9]`}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="w-[15px] h-[15px]"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6" /></svg>
+                <Trash2 className="w-[15px] h-[15px]" strokeWidth={1.9} />
               </button>
             </div>
           )}

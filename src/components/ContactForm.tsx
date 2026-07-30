@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Check } from "lucide-react";
 import { submitInquiry } from "../lib/api";
 
 /** Shared inquiry form — used on the homepage and the Contact page. */
@@ -31,39 +32,37 @@ export default function ContactForm({ productSubject, contactEmail }: { productS
 
   if (state === "sent") {
     return (
-      <div className="bg-[#E8F7EF] border border-[#B6E6CB] text-[#137A43] rounded-3xl p-8 text-center">
-        <div className="w-12 h-12 mx-auto grid place-items-center rounded-full bg-[#137A43] text-white text-2xl mb-3">✓</div>
-        <h3 className="text-2xl font-semibold tracking-tight mb-1.5">Thanks — your inquiry is in.</h3>
-        <p>We'll get back to you at <b>{form.email}</b> shortly.</p>
+      <div className="bg-[#E8F7EF] border border-[#B6E6CB] text-[#137A43] p-8 lg:p-10 text-center">
+        <div className="w-12 h-12 mx-auto grid place-items-center bg-[#137A43] text-white mb-4">
+          <Check className="w-6 h-6" strokeWidth={2.2} />
+        </div>
+        <h3 className="h-card mb-2">Thanks — your inquiry is in.</h3>
+        <p className="text-[15px] leading-[1.6]">We'll get back to you at <b>{form.email}</b> shortly.</p>
       </div>
     );
   }
 
   return (
-    <form className="bg-white border border-line rounded-3xl p-6 lg:p-8 shadow-card" onSubmit={onSubmit}>
+    <form className="bg-white border border-ref-hair p-6 lg:p-9" onSubmit={onSubmit}>
       {state === "error" && (
-        <div className="bg-[#FDECEA] border border-[#F5C2BA] text-[#B23120] px-4 py-3 rounded text-[13.5px] mb-4">
+        <div className="bg-[#FDECEA] border border-[#F5C2BA] text-[#B23120] px-4 py-3 text-[13.5px] mb-5">
           {err}{contactEmail ? ` You can also email us directly at ${contactEmail}.` : ""}
         </div>
       )}
       <input type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={set("website")} className="hidden" aria-hidden="true" />
-      <div className="grid sm:grid-cols-2 gap-3.5">
-        <div><label className="field-label">Name *</label><input required className="input" value={form.name} onChange={set("name")} /></div>
-        <div><label className="field-label">Company</label><input className="input" value={form.company} onChange={set("company")} /></div>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div><label className="label-ref">Name *</label><input required className="input-ref" value={form.name} onChange={set("name")} /></div>
+        <div><label className="label-ref">Company</label><input className="input-ref" value={form.company} onChange={set("company")} /></div>
       </div>
-      <div className="grid sm:grid-cols-2 gap-3.5 mt-3.5">
-        <div><label className="field-label">Email *</label><input type="email" required className="input" value={form.email} onChange={set("email")} /></div>
-        <div><label className="field-label">Phone</label><input className="input" value={form.phone} onChange={set("phone")} /></div>
+      <div className="grid sm:grid-cols-2 gap-4 mt-4">
+        <div><label className="label-ref">Email *</label><input type="email" required className="input-ref" value={form.email} onChange={set("email")} /></div>
+        <div><label className="label-ref">Phone</label><input className="input-ref" value={form.phone} onChange={set("phone")} /></div>
       </div>
-      <div className="mt-3.5">
-        <label className="field-label">What do you need? *</label>
-        <textarea required className="input min-h-[140px] resize-y" value={form.message} onChange={set("message")} />
+      <div className="mt-4">
+        <label className="label-ref">What do you need? *</label>
+        <textarea required className="input-ref min-h-[150px] resize-y" value={form.message} onChange={set("message")} />
       </div>
-      <button
-        type="submit"
-        className="inline-flex items-center justify-center font-display font-semibold text-[15px] rounded-full px-7 py-3 bg-corp-orange text-white hover:bg-corp-orangeD transition-colors mt-5 w-full sm:w-auto disabled:opacity-60"
-        disabled={state === "sending"}
-      >
+      <button type="submit" className="btn-ref-accent mt-6 w-full sm:w-auto disabled:opacity-60" disabled={state === "sending"}>
         {state === "sending" ? "Sending…" : "Send inquiry"}
       </button>
     </form>

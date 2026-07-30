@@ -17,48 +17,37 @@ export function useHomeMotion(scope: RefObject<HTMLElement>) {
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       const ctx = gsap.context(() => {
-        /* ---- scroll progress hairline -------------------------------- */
-        gsap.to(".scroll-progress", {
-          scaleX: 1,
-          ease: "none",
-          scrollTrigger: { start: 0, end: "max", scrub: 0.4 },
-        });
-
         /* ---- hero intro ---------------------------------------------- */
         // Hide before first paint; the fonts.ready timeline brings it in.
         gsap.set(".hero-eyebrow", { autoAlpha: 0, y: 14 });
         gsap.set(".hero-title", { autoAlpha: 0 });
         gsap.set([".hero-sub", ".hero-ctas"], { autoAlpha: 0, y: 18 });
-        gsap.set(".hero-video", { autoAlpha: 0 });
-        gsap.set(".hero-stats", { autoAlpha: 0, y: 12 });
 
-        // Split after webfonts load so Playfair's metrics set the line breaks.
-        document.fonts.ready.then(() => {
+        // Split after webfonts load so DM Sans's metrics set the line breaks —
+        // but never let a slow or blocked font request strand the hero at
+        // opacity 0. Whichever settles first wins.
+        Promise.race([
+          document.fonts.ready,
+          new Promise((r) => setTimeout(r, 1500)),
+        ]).then(() => {
           if (killed) return;
           const split = SplitText.create(".hero-title", { type: "lines", mask: "lines" });
           gsap
             // Restore the untouched heading afterwards — the line masks would
-            // otherwise clip Playfair's descenders at this tight line-height.
+            // otherwise clip DM Sans's descenders at this tight line-height.
             .timeline({ defaults: { ease: "power3.out" }, onComplete: () => split.revert() })
             .to(".hero-eyebrow", { autoAlpha: 1, y: 0, duration: 0.6 })
             .set(".hero-title", { autoAlpha: 1 }, "<+=0.1")
             .from(split.lines, { yPercent: 115, duration: 1.05, stagger: 0.11, ease: "power4.out" }, "<")
             .to(".hero-sub", { autoAlpha: 1, y: 0, duration: 0.7 }, "-=0.55")
-            .to(".hero-ctas", { autoAlpha: 1, y: 0, duration: 0.7 }, "-=0.5")
-            .to(".hero-video", { autoAlpha: 1, duration: 0.9 }, "-=0.45")
-            .to(".hero-stats", { autoAlpha: 1, y: 0, duration: 0.6 }, "-=0.55");
+            .to(".hero-ctas", { autoAlpha: 1, y: 0, duration: 0.7 }, "-=0.5");
         });
 
-        /* ---- hero video: expand as it scrolls into place ------------- */
+        /* ---- hero media: slow Ken Burns drift, as on the reference ---- */
         gsap.fromTo(
-          ".hero-video-frame",
-          { scale: 0.94, borderRadius: 28 },
-          {
-            scale: 1,
-            borderRadius: 0,
-            ease: "none",
-            scrollTrigger: { trigger: ".hero-video", start: "top 90%", end: "top 30%", scrub: 0.5 },
-          },
+          ".hero-media",
+          { scale: 1.06 },
+          { scale: 1.16, duration: 22, ease: "power1.out" },
         );
 
         /* ---- stat count-ups ------------------------------------------ */
@@ -90,20 +79,6 @@ export function useHomeMotion(scope: RefObject<HTMLElement>) {
             scrollTrigger: { trigger: ".story-body", start: "top 78%", end: "bottom 55%", scrub: true },
           });
         }
-
-        /* ---- services bento: slow parallax inside each card ---------- */
-        gsap.utils.toArray<HTMLElement>(".svc-img").forEach((img) => {
-          gsap.set(img, { scale: 1.16 });
-          gsap.fromTo(
-            img,
-            { yPercent: -7 },
-            {
-              yPercent: 7,
-              ease: "none",
-              scrollTrigger: { trigger: img.parentElement, start: "top bottom", end: "bottom top", scrub: true },
-            },
-          );
-        });
 
         /* ---- card grids: staggered rise ------------------------------ */
         gsap.utils.toArray<HTMLElement>(".stagger-grid").forEach((grid) => {

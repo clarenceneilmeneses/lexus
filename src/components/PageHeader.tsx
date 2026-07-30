@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-/** Light, centered Apple-style hero used at the top of inner pages. */
+/** Centred page intro used at the top of inner pages — the reference's
+ *  eyebrow-with-rules + heading + lede, on the off-white band. */
 export default function PageHeader({
   eyebrow,
   title,
@@ -13,11 +14,11 @@ export default function PageHeader({
   children?: ReactNode;
 }) {
   return (
-    <section className="section-light border-b border-line">
-      <div className="wrap py-16 lg:py-24 text-center max-w-3xl mx-auto">
-        <span className="eyebrow-corp justify-center">{eyebrow}</span>
-        <h1 className="text-[clamp(34px,5.4vw,64px)] font-semibold tracking-[-0.02em] text-corp-navy mt-4 leading-[1.04]">{title}</h1>
-        {subtitle && <p className="text-[clamp(16px,2vw,20px)] text-corp-grey max-w-2xl mx-auto mt-5 leading-relaxed">{subtitle}</p>}
+    <section className="bg-ref-off border-b border-ref-hair">
+      <div className="band py-[52px] lg:py-[70px] text-center">
+        <span className="eyebrow-rule center">{eyebrow}</span>
+        <h1 className="h-hero text-ref-ink mt-5 max-w-3xl mx-auto">{title}</h1>
+        {subtitle && <p className="copy max-w-2xl mx-auto mt-5">{subtitle}</p>}
         {children}
       </div>
     </section>
