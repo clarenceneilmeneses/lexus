@@ -76,11 +76,24 @@ export interface Branch {
   email?: string;
 }
 
+/** A section's intro text: small label, heading, and lead paragraph. */
+export interface SectionHeading { eyebrow: string; title: string; subtitle: string; }
+
 export interface HeroSettings { eyebrow: string; title: string; subtitle: string; cta_label: string; video_url?: string; }
-export interface AboutSettings { title: string; body: string; stats: { label: string; value: string }[]; }
+export interface AboutSettings { eyebrow: string; title: string; body: string; stats: { label: string; value: string }[]; }
 export interface ServiceItem { title: string; body: string; image?: string | null; }
-export interface ServicesSettings { title: string; items: ServiceItem[]; }
-export interface ContactSettings { email: string; phone: string; address: string; hours: string; branches?: Branch[]; }
+export interface ServicesSettings { eyebrow: string; title: string; subtitle: string; items: ServiceItem[]; }
+export interface ContactSettings extends SectionHeading {
+  email: string;
+  phone: string;
+  address: string;
+  hours: string;
+  branches?: Branch[];
+  /** Photo beside the home-page contact form, plus its overlaid caption. */
+  image?: string | null;
+  image_eyebrow: string;
+  image_caption: string;
+}
 export interface InteriorItem { eyebrow: string; title: string; image?: string | null; }
 export interface InteriorsSettings { eyebrow: string; title: string; subtitle: string; items: InteriorItem[]; }
 export interface CredentialStat { value: string; label: string; }
@@ -96,6 +109,10 @@ export interface SiteSettings {
   hero: HeroSettings;
   about: AboutSettings;
   services: ServicesSettings;
+  /** Intro above the home-page "Featured Products" carousel. */
+  featured: SectionHeading;
+  /** Intro above the home-page "Shop by Category" tiles. */
+  category_section: SectionHeading;
   interiors: InteriorsSettings;
   credentials: CredentialsSettings;
   testimonials: TestimonialsSettings;

@@ -70,7 +70,15 @@ export default function Dashboard({ catalog, go }: { catalog: Catalog; go: (tab:
             <button className="btn btn-ghost btn-sm justify-start" onClick={() => go("content")}>Edit homepage content</button>
             <div className="mt-2 pt-3 border-t border-line-2">
               <span className="font-mono text-[11px] uppercase tracking-wide text-steel">Featured</span>
-              <div className="font-display font-bold text-corp-navy">{featured} products on the homepage</div>
+              {/* The homepage shows featured products, capped at 10, and falls
+                  back to the first 10 products when nothing is featured. */}
+              <div className="font-display font-bold text-corp-navy">
+                {featured === 0
+                  ? "None picked yet"
+                  : `${Math.min(featured, 10)} product${Math.min(featured, 10) === 1 ? "" : "s"} on the homepage`}
+              </div>
+              {featured === 0 && <p className="text-steel text-[12px] mt-0.5">The homepage is showing your first 10 products instead.</p>}
+              {featured > 10 && <p className="text-steel text-[12px] mt-0.5">{featured} are marked featured — only the first 10 fit.</p>}
             </div>
           </div>
         </div>

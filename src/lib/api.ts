@@ -7,10 +7,12 @@ const DEFAULT_SETTINGS: SiteSettings = {
     title: "The premier source for your finishing and construction needs.",
     subtitle:
       "Wholesale and retail supplier of modern interior finishings and trusted international brands — boards, panels, drywall, ceiling systems, and more — from our head office in Metro Manila.",
-    cta_label: "Browse products",
+    // Labels the hero's secondary button, which scrolls to the services band.
+    cta_label: "Explore our work",
     video_url: "",
   },
   about: {
+    eyebrow: "Our story",
     title: "About Lexus Industrial",
     body: "Lexus Industrial Enterprise Corporation has been a leading wholesale and retail comprehensive company with the head office located in Metro Manila, Philippines. Since 1995, the company has been known for providing reputable modern interior finishings and a selection of trusted international brands with high-grade features.",
     stats: [
@@ -20,13 +22,25 @@ const DEFAULT_SETTINGS: SiteSettings = {
     ],
   },
   services: {
+    eyebrow: "What we do",
     title: "Our services",
+    subtitle: "Everything from raw boards to ready-to-install panels — handled in-house.",
     items: [
       { title: "Supply and Distribution", body: "Wholesale and retail supply of interior finishing materials to projects nationwide." },
       { title: "Lamination Services", body: "Professional lamination of boards and panels to your required finishes and sizes." },
       { title: "Metal Production", body: "Fabrication of light steel frame and metal components for walls and ceilings." },
       { title: "Cutting & Edging", body: "Precision cut-to-size and edgebanding for ready-to-install panels." },
     ],
+  },
+  featured: {
+    eyebrow: "The lineup",
+    title: "Featured Products",
+    subtitle: "A selection from the catalog — boards, panels, framing and finishes, ready to specify.",
+  },
+  category_section: {
+    eyebrow: "Our products",
+    title: "Shop by Category",
+    subtitle: "From boards and panels to framing and finishes — browse the full range by category.",
   },
   interiors: {
     eyebrow: "Designed to be lived in",
@@ -79,10 +93,17 @@ const DEFAULT_SETTINGS: SiteSettings = {
     ],
   },
   contact: {
+    eyebrow: "Get in touch",
+    title: "Contact Us",
+    subtitle:
+      "Tell us what you need — we'll respond with availability and pricing, including hard-to-find finishes.",
     email: "am.unlayao@lexusindustrial.com.ph",
     phone: "",
     address: "Metro Manila, Philippines",
     hours: "Mon to Sat, 8:00 AM to 5:00 PM",
+    image: null,
+    image_eyebrow: "Since 1995",
+    image_caption: "Trusted by the interior design industry across the Philippines.",
     branches: [
       { city: "Metro Manila", address: "Head Office — Metro Manila, Philippines", phone: "", email: "am.unlayao@lexusindustrial.com.ph" },
     ],

@@ -83,6 +83,8 @@ export default function Home() {
   const { catalog } = useOutletContext<{ catalog: Catalog }>();
   const { settings, categories, products } = catalog;
   const { hero, services, about, contact, interiors, credentials, testimonials, partners } = settings;
+  // Aliased: `featured` below is the product list, and `categories` is the catalog's.
+  const { featured: featuredBlock, category_section: categoryBlock } = settings;
 
   const rootRef = useRef<HTMLDivElement>(null);
   useHomeMotion(rootRef);
@@ -192,11 +194,11 @@ export default function Home() {
       {/* ============ ONE-STOP SOLUTIONS — navy band with cards pulled up over it ============ */}
       <section id="services" className="bg-ref-band pt-[52px] pb-[52px] lg:pt-[70px] lg:pb-[170px] scroll-mt-20">
         <div className="band text-center">
-          <span className="eyebrow-rule center on-dark">What we do</span>
+          <span className="eyebrow-rule center on-dark">{services.eyebrow}</span>
           <h2 className="h-sec text-white mt-4">{services.title || "One-Stop Solutions Provider"}</h2>
-          <p className="copy !text-white/70 max-w-2xl mx-auto mt-5">
-            Everything from raw boards to ready-to-install panels — handled in-house.
-          </p>
+          {services.subtitle && (
+            <p className="copy !text-white/70 max-w-2xl mx-auto mt-5">{services.subtitle}</p>
+          )}
         </div>
       </section>
       {/* `flow-root` is load-bearing: without a block formatting context the
@@ -246,7 +248,7 @@ export default function Home() {
         <section className="sec bg-ref-off relative" style={{ backgroundImage: HATCH }}>
           <div className="band relative grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
             <div className="reveal">
-              <span className="eyebrow-rule start">Our story</span>
+              <span className="eyebrow-rule start">{about.eyebrow}</span>
               <h2 className="h-sec text-ref-ink mt-4">{about.title || "Guided by Values. Powered by Purpose."}</h2>
               <Link to="/about" className="btn-ref-out mt-8">Learn more</Link>
             </div>
@@ -278,11 +280,11 @@ export default function Home() {
       {/* ============================ FEATURED PRODUCTS — carousel ============================ */}
       <section id="products" className="sec bg-white border-t border-ref-hair scroll-mt-20">
         <div className="band text-center reveal">
-          <span className="eyebrow-rule center">The lineup</span>
-          <h2 className="h-sec text-ref-ink mt-4">Featured Products</h2>
-          <p className="copy max-w-2xl mx-auto mt-5">
-            A selection from the catalog — boards, panels, framing and finishes, ready to specify.
-          </p>
+          <span className="eyebrow-rule center">{featuredBlock.eyebrow}</span>
+          <h2 className="h-sec text-ref-ink mt-4">{featuredBlock.title}</h2>
+          {featuredBlock.subtitle && (
+            <p className="copy max-w-2xl mx-auto mt-5">{featuredBlock.subtitle}</p>
+          )}
         </div>
 
         <div className="relative mt-10 lg:mt-12">
@@ -340,11 +342,11 @@ export default function Home() {
       {/* ============================ SHOP BY CATEGORY ============================ */}
       <section id="categories" className="sec bg-ref-off scroll-mt-20">
         <div className="band text-center reveal">
-          <span className="eyebrow-rule center">Our products</span>
-          <h2 className="h-sec text-ref-ink mt-4">Shop by Category</h2>
-          <p className="copy max-w-2xl mx-auto mt-5">
-            From boards and panels to framing and finishes — browse the full range by category.
-          </p>
+          <span className="eyebrow-rule center">{categoryBlock.eyebrow}</span>
+          <h2 className="h-sec text-ref-ink mt-4">{categoryBlock.title}</h2>
+          {categoryBlock.subtitle && (
+            <p className="copy max-w-2xl mx-auto mt-5">{categoryBlock.subtitle}</p>
+          )}
         </div>
         <div className="band-cards mt-10 lg:mt-12">
           <div className="stagger-grid grid grid-cols-2 lg:grid-cols-4 gap-5">
@@ -498,11 +500,9 @@ export default function Home() {
       {/* ============================ CONTACT — form + branches ============================ */}
       <section id="contact" className="sec bg-white scroll-mt-20">
         <div className="band text-center reveal">
-          <span className="eyebrow-rule center">Get in touch</span>
-          <h2 className="h-sec text-ref-ink mt-4">Contact Us</h2>
-          <p className="copy max-w-2xl mx-auto mt-5">
-            Tell us what you need — we'll respond with availability and pricing, including hard-to-find finishes.
-          </p>
+          <span className="eyebrow-rule center">{contact.eyebrow}</span>
+          <h2 className="h-sec text-ref-ink mt-4">{contact.title}</h2>
+          {contact.subtitle && <p className="copy max-w-2xl mx-auto mt-5">{contact.subtitle}</p>}
         </div>
 
         <div className="band-cards mt-10 lg:mt-12">
@@ -510,19 +510,21 @@ export default function Home() {
             <div className="space-y-5">
               <div className="relative overflow-hidden bg-ref-band aspect-[16/10]">
                 <img
-                  src={IMG.dining}
-                  alt="Interior finished with Lexus materials"
+                  src={imgUrl(contact.image) || IMG.dining}
+                  alt={contact.image_caption || "Interior finished with Lexus materials"}
                   loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover opacity-85"
                 />
                 <div className="dany-scrim" />
                 <div className="absolute left-6 right-6 bottom-6 text-white">
-                  <span className="font-ui font-semibold text-[12px] uppercase tracking-[0.1em] text-white/65">
-                    Since 1995
-                  </span>
-                  <p className="copy-sm !text-white/85 mt-1.5">
-                    Trusted by the interior design industry across the Philippines.
-                  </p>
+                  {contact.image_eyebrow && (
+                    <span className="font-ui font-semibold text-[12px] uppercase tracking-[0.1em] text-white/65">
+                      {contact.image_eyebrow}
+                    </span>
+                  )}
+                  {contact.image_caption && (
+                    <p className="copy-sm !text-white/85 mt-1.5">{contact.image_caption}</p>
+                  )}
                 </div>
               </div>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">

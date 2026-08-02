@@ -101,7 +101,10 @@ export default function CategoriesPanel({ catalog, reload, canWrite }: { catalog
           </button>
         )}
       </div>
-      <p className="font-mono text-[11px] text-steel mt-1.5">Shown on the home “Shop by category” mosaic. Square images work best.</p>
+      <p className="font-mono text-[11px] text-steel mt-1.5">
+        Shown on the home “Shop by category” tiles — the first 8 categories in this list. Tall (3:4) images work best.
+        Leave it empty and the tile borrows a photo from a product in this category.
+      </p>
     </div>
   );
 
