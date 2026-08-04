@@ -9,6 +9,20 @@ import { StatCard, StatRow } from "../../components/StatCard";
  * writes the `contact` key, so two people editing at once can't clobber each
  * other's changes.
  */
+/** Plain-language hint plus a length counter that warns past Google's cut-off. */
+function CharHint({ value, ideal, hint }: { value: string; ideal: number; hint: string }) {
+  const n = value.trim().length;
+  const over = n > ideal;
+  return (
+    <div className="flex items-start justify-between gap-3 mt-1.5">
+      <p className="text-steel text-[12px] leading-snug">{hint}</p>
+      <span className={`font-mono text-[11px] tabular-nums whitespace-nowrap ${over ? "text-[#B26B00]" : "text-steel-2"}`}>
+        {n}/{ideal}{over ? " — may be cut off" : ""}
+      </span>
+    </div>
+  );
+}
+
 export default function SettingsPanel({ catalog, reload }: { catalog: Catalog; reload: () => void }) {
   const s = catalog.settings;
   const [social, setSocial] = useState<SocialSettings>({ ...s.social });
@@ -33,7 +47,7 @@ export default function SettingsPanel({ catalog, reload }: { catalog: Catalog; r
   }
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-[22px]">Site settings</h2>
         <button className="btn btn-primary btn-sm" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save settings"}</button>
@@ -51,22 +65,45 @@ export default function SettingsPanel({ catalog, reload }: { catalog: Catalog; r
         Looking for the <b className="text-ink">email, phone, address or branches</b>? They're edited under <b className="text-ink">Website content → Contact details</b>, alongside the wording that goes with them.
       </div>
 
-      {/* Social */}
-      <div className="panel mb-4">
-        <h3 className="text-base mb-3">Social links</h3>
-        <div className="grid sm:grid-cols-3 gap-3">
-          <div><label className="field-label">Facebook</label><input className="input" value={social.facebook ?? ""} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} /></div>
-          <div><label className="field-label">Instagram</label><input className="input" value={social.instagram ?? ""} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} /></div>
-          <div><label className="field-label">LinkedIn</label><input className="input" value={social.linkedin ?? ""} onChange={(e) => setSocial({ ...social, linkedin: e.target.value })} /></div>
+      {/* Side by side on wide screens so neither card stretches on its own */}
+      <div className="grid gap-4 lg:grid-cols-2 items-start">
+        {/* Social */}
+        <div className="panel">
+          <h3 className="text-base mb-3">Social links</h3>
+          <div className="grid gap-3">
+            <div><label className="field-label">Facebook</label><input className="input" value={social.facebook ?? ""} onChange={(e) => setSocial({ ...social, facebook: e.target.value })} /></div>
+            <div><label className="field-label">Instagram</label><input className="input" value={social.instagram ?? ""} onChange={(e) => setSocial({ ...social, instagram: e.target.value })} /></div>
+            <div><label className="field-label">LinkedIn</label><input className="input" value={social.linkedin ?? ""} onChange={(e) => setSocial({ ...social, linkedin: e.target.value })} /></div>
+          </div>
         </div>
-      </div>
 
-      {/* SEO */}
-      <div className="panel">
-        <h3 className="text-base mb-3">SEO</h3>
-        <div className="grid gap-3">
-          <div><label className="field-label">Meta title</label><input className="input" value={seo.title ?? ""} onChange={(e) => setSeo({ ...seo, title: e.target.value })} /></div>
-          <div><label className="field-label">Meta description</label><textarea className="input min-h-[80px]" value={seo.description ?? ""} onChange={(e) => setSeo({ ...seo, description: e.target.value })} /></div>
+        {/* SEO */}
+        <div className="panel">
+          <h3 className="text-base mb-1">SEO</h3>
+          <p className="text-steel text-[13px] mb-3">
+            What Google shows when someone finds your website. Individual pages write their own —
+            these are the site-wide default, used on the home page.
+          </p>
+          <div className="grid gap-3">
+            <div>
+              <label className="field-label">Meta title</label>
+              <input className="input" value={seo.title ?? ""} onChange={(e) => setSeo({ ...seo, title: e.target.value })} />
+              <CharHint
+                value={seo.title ?? ""}
+                ideal={60}
+                hint="The blue clickable line in Google. Put what you sell and where — e.g. “Interior Finishings & Building Materials Supplier | Metro Manila”."
+              />
+            </div>
+            <div>
+              <label className="field-label">Meta description</label>
+              <textarea className="input min-h-[104px]" value={seo.description ?? ""} onChange={(e) => setSeo({ ...seo, description: e.target.value })} />
+              <CharHint
+                value={seo.description ?? ""}
+                ideal={160}
+                hint="The grey summary under the title. One or two sentences: what you supply, who you serve, and since when."
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

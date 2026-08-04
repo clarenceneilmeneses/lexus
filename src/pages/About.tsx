@@ -1,6 +1,7 @@
 import { Link, useOutletContext } from "react-router-dom";
 import type { Catalog } from "../lib/types";
 import PageHeader from "../components/PageHeader";
+import { useSeo } from "../lib/seo";
 
 const IMG = {
   facade: "/lexus/facade.jpg",
@@ -18,6 +19,17 @@ const VALUES = [
 export default function About() {
   const { catalog } = useOutletContext<{ catalog: Catalog }>();
   const a = catalog.settings.about;
+
+  useSeo(
+    {
+      title: "About Us",
+      description:
+        a.body ||
+        "Lexus Industrial Enterprise Corporation has supplied modern interior finishings and building materials to the Philippine design industry since 1995.",
+      image: IMG.facade,
+    },
+    catalog.settings
+  );
 
   return (
     <>

@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Boxes, LayoutGrid, MessageSquare, PenLine, Users, ScrollText,
-  Settings, ChevronLeft, ExternalLink, LogOut, Menu, type LucideIcon,
+  Settings, ChevronLeft, ChevronRight, ExternalLink, LogOut, Menu, X, type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useCatalog } from "../../hooks/useCatalog";
-import { Brand } from "../../components/layout/Header";
 import { cn } from "../../lib/utils";
 import type { Role } from "../../lib/types";
 import Login from "./Login";
@@ -20,23 +19,47 @@ import LogsPanel from "./LogsPanel";
 import SettingsPanel from "./SettingsPanel";
 
 type Tab = "dashboard" | "products" | "categories" | "inquiries" | "content" | "users" | "logs" | "settings";
+type NavItem = { key: Tab; label: string; icon: LucideIcon; adminOnly?: boolean };
 
-// adminOnly=false → visible to everyone signed in (read-only ok).
-const NAV: { key: Tab; label: string; icon: LucideIcon; adminOnly?: boolean }[] = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "products", label: "Products", icon: Boxes },
-  { key: "categories", label: "Categories", icon: LayoutGrid },
-  { key: "inquiries", label: "Inquiries", icon: MessageSquare },
-  { key: "content", label: "Content", icon: PenLine },
-  { key: "users", label: "Users", icon: Users, adminOnly: true },
-  { key: "logs", label: "Activity log", icon: ScrollText, adminOnly: true },
-  { key: "settings", label: "Settings", icon: Settings, adminOnly: true },
+// Nav in labelled groups — the section captions give the rail a scannable
+// rhythm instead of one long list. adminOnly=false → visible to anyone signed
+// in (read-only is fine).
+const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
+  {
+    label: "General",
+    items: [{ key: "dashboard", label: "Dashboard", icon: LayoutDashboard }],
+  },
+  {
+    label: "Catalog",
+    items: [
+      { key: "products", label: "Products", icon: Boxes },
+      { key: "categories", label: "Categories", icon: LayoutGrid },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { key: "inquiries", label: "Inquiries", icon: MessageSquare },
+      { key: "content", label: "Site content", icon: PenLine },
+    ],
+  },
+  {
+    label: "Administration",
+    items: [
+      { key: "users", label: "Users", icon: Users, adminOnly: true },
+      { key: "logs", label: "Activity log", icon: ScrollText, adminOnly: true },
+      { key: "settings", label: "Settings", icon: Settings, adminOnly: true },
+    ],
+  },
 ];
 
+const ALL_NAV = NAV_GROUPS.flatMap((g) => g.items);
+
+// Role pill, tuned for the light chrome.
 const ROLE_PILL: Record<Role, string> = {
-  admin: "border-accent-glow/50 text-accent-glow",
-  editor: "border-[#137A43]/50 text-[#5fd49a]",
-  viewer: "border-white/30 text-[#aeb6c2]",
+  admin: "border-accent/25 text-accent bg-accent-soft/60",
+  editor: "border-[#137A43]/30 text-[#137A43] bg-[#137A43]/8",
+  viewer: "border-steel/25 text-steel bg-black/[0.03]",
 };
 
 export default function AdminApp() {
@@ -69,110 +92,173 @@ export default function AdminApp() {
     );
   }
 
-  const visibleNav = NAV.filter((n) => !n.adminOnly || isAdmin);
   const displayName = (session.user.email?.split("@")[0] || "there")
     .replace(/[._-]+/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
+  const currentLabel = ALL_NAV.find((n) => n.key === tab)?.label ?? "Dashboard";
 
-  function NavButton({ n }: { n: (typeof NAV)[number] }) {
+  function NavButton({ n }: { n: NavItem }) {
     const Icon = n.icon;
+    const active = tab === n.key;
     return (
       <button
         onClick={() => { setTab(n.key); setNavOpen(false); }}
         title={collapsed ? n.label : undefined}
+        aria-current={active ? "page" : undefined}
         className={cn(
-          "flex items-center gap-3 w-full rounded-xl font-medium text-[14px] transition-colors",
-          collapsed ? "md:justify-center md:px-0 px-3.5 py-2.5" : "px-3.5 py-2.5",
-          tab === n.key ? "bg-accent-glow text-corp-navy" : "text-[#c3cad6] hover:bg-white/10 hover:text-white"
+          "flex items-center gap-3 w-full rounded-xl font-medium text-[14px] transition-colors px-3 py-2.5 border",
+          collapsed && "md:justify-center md:px-0",
+          active
+            ? "bg-accent-soft/70 border-accent/25 text-accent"
+            : "border-transparent text-[#5a6270] hover:bg-black/[0.035] hover:text-ink"
         )}
       >
         <Icon className="w-[18px] h-[18px] flex-none" strokeWidth={1.8} />
-        <span className={cn(collapsed && "md:hidden")}>{n.label}</span>
+        <span className={cn("truncate", collapsed && "md:hidden")}>{n.label}</span>
       </button>
     );
   }
 
   return (
-    <div className="admin-ui min-h-screen bg-paper md:flex">
-      {/* ===== Floating sidebar pill ===== */}
+    <div className="admin-ui min-h-screen bg-paper md:flex md:gap-3 md:p-3">
+      {/* ===== Sidebar — brand, grouped nav, sign out ===== */}
       <aside
         className={cn(
-          "fixed z-40 inset-y-0 left-0 w-[256px] h-screen shrink-0 bg-corp-navy text-white flex flex-col transition-all duration-200",
-          "md:sticky md:top-3 md:self-start md:my-3 md:ml-3 md:h-[calc(100vh-1.5rem)] md:rounded-2xl md:shadow-2xl md:ring-1 md:ring-white/10 md:translate-x-0",
-          collapsed ? "md:w-[76px]" : "md:w-[244px]",
+          "fixed z-50 inset-y-0 left-0 w-[248px] h-screen shrink-0 bg-white flex flex-col transition-all duration-200",
+          "md:sticky md:top-3 md:self-start md:h-[calc(100vh-1.5rem)] md:rounded-2xl md:ring-1 md:ring-line md:shadow-card md:translate-x-0",
+          collapsed ? "md:w-[54px]" : "md:w-[228px]",
           navOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {/* Brand row + collapse toggle */}
-        <div className={cn("h-[64px] flex items-center gap-2 border-b border-white/10 flex-none", collapsed ? "md:justify-center md:px-2 px-4 justify-between" : "justify-between px-4")}>
-          <div className={cn("min-w-0", collapsed && "md:hidden")}>
-            <Brand className="h-6" />
-          </div>
+        {/* Brand + collapse toggle */}
+        <div className={cn("flex items-center gap-2 h-[58px] flex-none px-3 border-b border-line-2", collapsed && "md:justify-center md:px-1.5")}>
+          <img
+            src="/lexus/lexus-logo.png"
+            alt="Lexus Industrial"
+            className={cn("object-contain flex-none", collapsed ? "h-8 w-auto md:w-[38px] md:h-auto" : "h-8 w-auto")}
+          />
           <button
             onClick={() => setCollapsed((v) => !v)}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="flex-none hidden md:grid place-items-center w-8 h-8 rounded-lg text-[#c3cad6] hover:bg-white/10 hover:text-white transition-colors"
+            className={cn(
+              "ml-auto flex-none hidden md:grid place-items-center w-7 h-7 rounded-lg border border-line text-steel hover:text-ink hover:bg-black/[0.035] transition-colors",
+              collapsed && "md:hidden"
+            )}
           >
-            <ChevronLeft className={cn("w-[18px] h-[18px] transition-transform", collapsed && "rotate-180")} strokeWidth={1.9} />
+            <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+          </button>
+          <button
+            aria-label="Close menu"
+            onClick={() => setNavOpen(false)}
+            className="ml-auto md:hidden grid place-items-center w-8 h-8 rounded-lg text-steel hover:bg-black/5"
+          >
+            <X className="w-[18px] h-[18px]" strokeWidth={1.9} />
           </button>
         </div>
 
-        {/* Greeting + live clock */}
-        <div className={cn("border-b border-white/10 flex-none", collapsed ? "md:px-2 md:py-3 px-5 py-3.5" : "px-5 py-3.5")}>
-          <div className={cn(collapsed && "md:hidden")}>
-            <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent-glow border border-accent-glow/40 rounded px-1.5 py-0.5">Admin</span>
-            <div className="font-display font-semibold text-[14.5px] leading-tight mt-2">{greeting()}, {displayName}</div>
-          </div>
-          <Clock collapsed={collapsed} />
-        </div>
+        {/* Expand affordance when collapsed (the header toggle is hidden then) */}
+        {collapsed && (
+          <button
+            onClick={() => setCollapsed(false)}
+            title="Expand sidebar"
+            aria-label="Expand sidebar"
+            className="hidden md:grid place-items-center w-7 h-7 mx-auto mt-3 flex-none rounded-lg border border-line text-steel hover:text-ink hover:bg-black/[0.035] transition-colors"
+          >
+            <ChevronRight className="w-4 h-4" strokeWidth={2} />
+          </button>
+        )}
 
-        <nav className="flex-1 overflow-y-auto p-3 space-y-1 min-h-0">
-          {visibleNav.map((n) => <NavButton key={n.key} n={n} />)}
+        <nav className={cn("flex-1 overflow-y-auto overflow-x-hidden min-h-0 py-3", collapsed ? "px-2 md:px-1.5" : "px-3")}>
+          {NAV_GROUPS.map((group) => {
+            const items = group.items.filter((n) => !n.adminOnly || isAdmin);
+            if (!items.length) return null;
+            return (
+              <div key={group.label} className="mb-3 last:mb-0">
+                <div
+                  className={cn(
+                    "font-mono text-[10px] uppercase tracking-[0.16em] text-steel-2 px-3 pb-1.5 pt-1",
+                    collapsed && "md:hidden"
+                  )}
+                >
+                  {group.label}
+                </div>
+                {/* Collapsed: a hairline stands in for the group caption */}
+                <div className={cn("hidden mx-2 my-2 h-px bg-line-2", collapsed && "md:block")} />
+                <div className="space-y-0.5">
+                  {items.map((n) => <NavButton key={n.key} n={n} />)}
+                </div>
+              </div>
+            );
+          })}
         </nav>
 
-        <div className={cn("border-t border-white/10 flex-none", collapsed ? "md:p-2 p-3" : "p-3")}>
-          {/* Expanded footer */}
-          <div className={cn(collapsed && "md:hidden")}>
-            <div className="flex items-center gap-2 px-2 mb-2">
-              <span className={cn("font-mono text-[10px] uppercase tracking-[0.14em] border rounded px-1.5 py-0.5", ROLE_PILL[role])}>{role}</span>
-              <span className="font-mono text-[11px] text-[#aeb6c2] truncate">{session.user.email}</span>
-            </div>
-            <Link to="/" className="flex items-center gap-1.5 px-2 font-mono text-[12px] text-[#aeb6c2] hover:text-accent-glow mb-2.5">
-              View site <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.8} />
-            </Link>
-            <button className="btn btn-sm bg-white text-corp-navy w-full justify-center" onClick={signOut}>Sign out</button>
-          </div>
-          {/* Collapsed footer — icons only (desktop) */}
-          <div className={cn("flex-col items-center gap-2 hidden", collapsed && "md:flex")}>
-            <span className={cn("font-mono text-[10px] uppercase w-8 h-8 grid place-items-center rounded-lg", ROLE_PILL[role])} title={`Role: ${role}`}>{role[0]}</span>
-            <Link to="/" title="View site" className="grid place-items-center w-9 h-9 rounded-lg text-[#aeb6c2] hover:bg-white/10 hover:text-white">
-              <ExternalLink className="w-[18px] h-[18px]" strokeWidth={1.8} />
-            </Link>
-            <button onClick={signOut} title="Sign out" className="grid place-items-center w-9 h-9 rounded-lg bg-white text-corp-navy">
-              <LogOut className="w-[18px] h-[18px]" strokeWidth={1.9} />
-            </button>
-          </div>
+        <div className={cn("flex-none border-t border-line-2 p-2", collapsed && "md:px-1.5")}>
+          <button
+            onClick={signOut}
+            title={collapsed ? "Sign out" : undefined}
+            className={cn(
+              "flex items-center gap-3 w-full rounded-xl px-3 py-2.5 font-medium text-[14px] text-flag hover:bg-flag/8 transition-colors",
+              collapsed && "md:justify-center md:px-0"
+            )}
+          >
+            <LogOut className="w-[18px] h-[18px] flex-none" strokeWidth={1.8} />
+            <span className={cn(collapsed && "md:hidden")}>Sign out</span>
+          </button>
         </div>
       </aside>
 
       {/* backdrop for mobile drawer */}
-      {navOpen && <div className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={() => setNavOpen(false)} />}
+      {navOpen && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setNavOpen(false)} />}
 
-      {/* ===== Main ===== */}
-      <div className="flex-1 min-w-0">
-        {/* mobile top bar */}
-        <div className="md:hidden h-[56px] bg-corp-navy text-white flex items-center justify-between px-4">
-          <button aria-label="Open menu" onClick={() => setNavOpen(true)}>
-            <Menu className="w-6 h-6" strokeWidth={1.8} />
+      {/* ===== Main column ===== */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Top bar — breadcrumb left, account actions right */}
+        <header className="sticky top-0 md:top-3 z-30 flex-none h-[58px] bg-white ring-1 ring-line shadow-card md:rounded-2xl flex items-center gap-3 px-3 md:px-5">
+          <button
+            aria-label="Open menu"
+            onClick={() => setNavOpen(true)}
+            className="md:hidden grid place-items-center w-9 h-9 rounded-lg text-ink hover:bg-black/5 flex-none"
+          >
+            <Menu className="w-5 h-5" strokeWidth={1.9} />
           </button>
-          <span className="font-semibold">Admin</span>
-          <button className="font-mono text-[12px] flex items-center gap-1.5" onClick={signOut}>
-            <LogOut className="w-4 h-4" strokeWidth={1.8} /> Sign out
-          </button>
-        </div>
 
-        <div className="max-w-[1100px] mx-auto px-5 lg:px-8 py-7">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 min-w-0">
+            <span className="hidden sm:inline text-[14px] text-steel truncate">Lexus Industrial</span>
+            <ChevronRight className="hidden sm:block w-4 h-4 text-steel-2 flex-none" strokeWidth={2} />
+            <span className="font-display font-semibold text-[15px] text-ink truncate">{currentLabel}</span>
+          </nav>
+
+          <div className="ml-auto flex items-center gap-2 flex-none">
+            <Link
+              to="/"
+              className="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-xl border border-line text-[13px] text-steel hover:text-ink hover:bg-black/[0.035] transition-colors"
+            >
+              <ExternalLink className="w-[15px] h-[15px]" strokeWidth={1.9} /> View site
+            </Link>
+            <Link
+              to="/"
+              aria-label="View site"
+              className="sm:hidden grid place-items-center w-9 h-9 rounded-xl border border-line text-steel hover:text-ink"
+            >
+              <ExternalLink className="w-[16px] h-[16px]" strokeWidth={1.9} />
+            </Link>
+
+            <span className={cn("hidden md:inline font-mono text-[10px] uppercase tracking-[0.14em] border rounded px-1.5 py-0.5", ROLE_PILL[role])}>
+              {role}
+            </span>
+
+            <span
+              className="grid place-items-center w-9 h-9 rounded-full bg-accent-soft text-accent font-display font-semibold text-[14px] flex-none"
+              title={session.user.email ?? undefined}
+            >
+              {displayName[0]?.toUpperCase() ?? "?"}
+            </span>
+          </div>
+        </header>
+
+        {/* One surface for every tab — left-aligned, full width of the column */}
+        <main className="flex-1 mt-3 bg-white ring-1 ring-line shadow-card md:rounded-2xl px-4 md:px-6 py-5 md:py-6">
           {error && <div className="bg-[#FDECEA] border border-[#F5C2BA] text-[#B23120] px-3.5 py-3 rounded text-[13.5px] mb-4">{error}</div>}
           {!catalog ? (
             <p className="font-mono text-steel">Loading data…</p>
@@ -188,33 +274,7 @@ export default function AdminApp() {
               {tab === "settings" && (isAdmin ? <SettingsPanel catalog={catalog} reload={reload} /> : <NoAccess />)}
             </>
           )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function greeting() {
-  const h = new Date().getHours();
-  return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
-}
-
-function Clock({ collapsed = false }: { collapsed?: boolean }) {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <div className={cn("font-mono leading-relaxed", collapsed ? "mt-0 md:mt-0" : "mt-1.5")}>
-      {/* Compact: time only, centered (desktop collapsed). */}
-      <div className={cn("text-[#aeb6c2] tabular-nums text-center text-[10.5px] hidden", collapsed && "md:block")}>
-        {now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
-      </div>
-      {/* Full: weekday/date + ticking time. */}
-      <div className={cn("text-[11px]", collapsed && "md:hidden")}>
-        <div className="text-accent-glow">{now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</div>
-        <div className="text-[#aeb6c2] tabular-nums">{now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</div>
+        </main>
       </div>
     </div>
   );

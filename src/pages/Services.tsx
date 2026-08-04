@@ -2,6 +2,7 @@ import { Link, useOutletContext } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import type { Catalog } from "../lib/types";
 import PageHeader from "../components/PageHeader";
+import { useSeo } from "../lib/seo";
 
 const STEPS = [
   ["Tell us the spec", "Share sizes, finishes, quantities, and your delivery timeline."],
@@ -13,6 +14,16 @@ const STEPS = [
 export default function Services() {
   const { catalog } = useOutletContext<{ catalog: Catalog }>();
   const s = catalog.settings.services;
+
+  useSeo(
+    {
+      title: "Services — Lamination, Cut-to-Size & Edging",
+      description:
+        s.subtitle ||
+        "Lamination, cut-to-size and edging services for interior finishing panels — delivered to project sites across the Philippines.",
+    },
+    catalog.settings
+  );
 
   return (
     <>

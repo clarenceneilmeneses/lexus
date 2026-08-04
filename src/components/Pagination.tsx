@@ -5,10 +5,12 @@ interface Props {
   page: number;
   totalPages: number;
   onPage: (p: number) => void;
-  /** Optional "13–24 of 57" summary line shown above the controls. */
+  /** Optional "13–24 of 57" summary — beside the controls when right-aligned. */
   from?: number;
   to?: number;
   total?: number;
+  /** "right" (default) for tables/lists; "center" for the editorial grids. */
+  align?: "right" | "center";
   className?: string;
 }
 
@@ -22,16 +24,25 @@ function pageWindow(page: number, total: number): (number | "…")[] {
   return out;
 }
 
-export default function Pagination({ page, totalPages, onPage, from, to, total, className }: Props) {
+export default function Pagination({ page, totalPages, onPage, from, to, total, align = "right", className }: Props) {
   if (totalPages <= 1) return null;
   const nums = pageWindow(page, totalPages);
+  const right = align === "right";
 
   return (
-    <div className={cn("flex flex-col items-center gap-3 mt-8", className)}>
+    <div
+      className={cn(
+        "flex gap-3 mt-8",
+        right
+          ? "flex-col sm:flex-row sm:items-center sm:justify-between items-end"
+          : "flex-col items-center",
+        className
+      )}
+    >
       {total != null && from != null && to != null && (
         <p className="meta-ref"><span className="tabular-nums">{from}–{to}</span> of <span className="tabular-nums">{total}</span></p>
       )}
-      <div className="flex items-center gap-1.5 flex-wrap justify-center">
+      <div className={cn("flex items-center gap-1.5 flex-wrap", right ? "justify-end ml-auto" : "justify-center")}>
         <button
           className="w-9 h-9 grid place-items-center border border-ref-hair text-ref-band hover:border-ref-band disabled:opacity-40 disabled:hover:border-ref-hair transition-colors"
           disabled={page <= 1}

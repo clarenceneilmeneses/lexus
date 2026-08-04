@@ -7,6 +7,7 @@ import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
 import CategoryIcon from "../components/CategoryIcon";
 import { usePagination } from "../hooks/usePagination";
+import { useSeo, useJsonLd, breadcrumbSchema } from "../lib/seo";
 
 export default function Products() {
   const { catalog } = useOutletContext<{ catalog: Catalog }>();
@@ -27,6 +28,25 @@ export default function Products() {
   const catName = catalog.categories.find((c) => c.slug === cat)?.name;
 
   const { page, setPage, totalPages, pageItems } = usePagination(filtered, 12, `${q}|${cat}`);
+
+  // Each category filter is its own indexable page — unique title, description
+  // and self-referencing canonical, and it's listed in the sitemap. The search
+  // box is local state (not in the URL), so it can't spawn duplicate URLs.
+  const catDesc = catalog.categories.find((c) => c.slug === cat)?.description;
+  useSeo(
+    {
+      title: catName ? `${catName} — Product Catalog` : "Product Catalog",
+      description: catName
+        ? `${catName} from Lexus Industrial. ${catDesc || "Wholesale and retail supply of interior finishings and building materials in Metro Manila, Philippines."}`
+        : `Browse ${catalog.products.length} interior finishing and building material products — laminates, panels, hardware and more. Wholesale and retail supply across the Philippines.`,
+      path: cat === "all" ? "/products" : `/products?cat=${cat}`,
+    },
+    catalog.settings
+  );
+  useJsonLd("breadcrumb", breadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Products", path: "/products" },
+  ]));
 
   return (
     <>
@@ -81,7 +101,7 @@ export default function Products() {
               <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(258px,1fr))" }}>
                 {pageItems.map((p) => <ProductCard key={p.id} p={p} />)}
               </div>
-              <Pagination page={page} totalPages={totalPages} onPage={setPage} />
+              <Pagination page={page} totalPages={totalPages} onPage={setPage} align="center" />
             </>
           ) : (
             <div className="card-ref text-center py-16 px-6">

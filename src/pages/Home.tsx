@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import type { Catalog, Category, PartnerLogo as PartnerLogoData } from "../lib/types";
 import { imgUrl, primaryImage, placeholder } from "../lib/utils";
+import { useSeo, useJsonLd, organizationSchema } from "../lib/seo";
 import ContactForm from "../components/ContactForm";
 import { useHomeMotion } from "../hooks/useHomeMotion";
 
@@ -71,7 +72,6 @@ const IMG = {
   metalFrame: "/lexus/metal-frame.jpg",
   worldbex: "/lexus/worldbex.jpg",
 };
-const SERVICE_IMG = [IMG.supply, IMG.lamination, IMG.metalFrame, IMG.cnc, IMG.metalCut];
 const INTERIOR_IMG = [IMG.kitchen, IMG.dining, IMG.facade];
 
 /** Faint diagonal hatch behind the story band — stands in for the reference's
@@ -86,14 +86,14 @@ export default function Home() {
   // Aliased: `featured` below is the product list, and `categories` is the catalog's.
   const { featured: featuredBlock, category_section: categoryBlock } = settings;
 
+  // Home carries the site-wide title/description straight from Site settings.
+  useSeo({ path: "/", image: imgUrl(credentials.image) ?? "/lexus/facade.jpg" }, settings);
+  useJsonLd("organization", organizationSchema(catalog));
+
   const rootRef = useRef<HTMLDivElement>(null);
   useHomeMotion(rootRef);
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  const lineupRef = useRef<HTMLDivElement>(null);
-  const scrollLineup = (dir: -1 | 1) => {
-    lineupRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
-  };
   const [muted, setMuted] = useState(true);
   const toggleMute = () => {
     const v = videoRef.current;
@@ -216,13 +216,14 @@ export default function Home() {
             >
               {row.map((it, i) => {
                 const idx = serviceRows.slice(0, r).reduce((n, x) => n + x.length, 0) + i;
+                // Same treatment as a product with no photo: the generated
+                // brand placeholder, not a blurry stock stand-in.
+                // No code line — the caption below already carries the number.
+                const photo = imgUrl(it.image) || placeholder(it.title);
+
                 return (
                   <article key={idx} className="dany aspect-[3/4]">
-                    <img
-                      src={imgUrl(it.image) || SERVICE_IMG[idx % SERVICE_IMG.length]}
-                      alt={it.title}
-                      loading="lazy"
-                    />
+                    <img src={photo} alt={it.title} loading="lazy" />
                     <div className="dany-scrim" />
                     <div className="dany-cap">
                       <div className="dany-cap-title">
@@ -287,54 +288,45 @@ export default function Home() {
           )}
         </div>
 
-        <div className="relative mt-10 lg:mt-12">
+        {/* Infinite marquee — two identical halves, CSS keyframe shifts -50%.
+            Hovering pauses it so a card can actually be clicked. Duration
+            scales with the card count to hold a steady pixel speed. */}
+        <div className="marquee-scroll mt-10 lg:mt-12 fade-x overflow-hidden">
           <div
-            ref={lineupRef}
-            className="stagger-grid lineup-pad flex gap-5 overflow-x-auto snap-x snap-mandatory pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="marquee-track flex w-max animate-marquee"
+            style={{ animationDuration: `${Math.max(30, lineup.length * 6)}s` }}
           >
-            {lineup.map((p) => (
-              <Link
-                key={p.id}
-                to={`/products/${p.slug}`}
-                className="group snap-start shrink-0 w-[280px] border border-ref-hair bg-white hover:border-ref-band transition-colors"
-              >
-                <div className="aspect-[3/4] overflow-hidden bg-ref-grey">
-                  <img
-                    src={primaryImage(p)}
-                    alt={p.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-6">
-                  <div className="font-ui font-semibold text-[12px] uppercase tracking-[0.1em] text-ref-accent">
-                    {p.brand || "Lexus"}
-                  </div>
-                  <h3 className="h-card text-ref-ink mt-2 line-clamp-2">{p.name}</h3>
-                </div>
-              </Link>
+            {[0, 1].map((half) => (
+              <div key={half} aria-hidden={half === 1} className="flex gap-5 pr-5">
+                {lineup.map((p) => (
+                  <Link
+                    key={p.id}
+                    to={`/products/${p.slug}`}
+                    tabIndex={half === 1 ? -1 : undefined}
+                    className="group shrink-0 w-[280px] border border-ref-hair bg-white hover:border-ref-band transition-colors"
+                  >
+                    <div className="aspect-[3/4] overflow-hidden bg-ref-grey">
+                      <img
+                        src={primaryImage(p)}
+                        alt={p.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <div className="font-ui font-semibold text-[12px] uppercase tracking-[0.1em] text-ref-accent">
+                        {p.brand || "Lexus"}
+                      </div>
+                      <h3 className="h-card text-ref-ink mt-2 line-clamp-2">{p.name}</h3>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             ))}
           </div>
-          <div className="pointer-events-none absolute right-0 top-0 bottom-2 w-16 bg-gradient-to-l from-white to-transparent hidden sm:block" />
         </div>
 
-        <div className="band flex flex-wrap items-center justify-center gap-x-6 gap-y-4 mt-10 reveal">
-          <div className="hidden sm:flex items-center gap-2">
-            <button
-              onClick={() => scrollLineup(-1)}
-              aria-label="Scroll products left"
-              className="w-11 h-11 grid place-items-center border border-ref-hair text-ref-band hover:border-ref-band transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" strokeWidth={1.8} />
-            </button>
-            <button
-              onClick={() => scrollLineup(1)}
-              aria-label="Scroll products right"
-              className="w-11 h-11 grid place-items-center border border-ref-hair text-ref-band hover:border-ref-band transition-colors"
-            >
-              <ChevronRight className="w-5 h-5" strokeWidth={1.8} />
-            </button>
-          </div>
+        <div className="band flex justify-center mt-10 reveal">
           <Link to="/products" className="link-ref">Explore the full catalog</Link>
         </div>
       </section>

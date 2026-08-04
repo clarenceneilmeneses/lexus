@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, PackageSearch } from "lucide-react";
+import { useSeo } from "../lib/seo";
 
 export default function NotFound() {
+  useSeo({ title: "Page not found", description: "This page isn't in the catalog.", noindex: true });
+
   return (
     <section className="bg-ref-off">
       <div className="band py-28 lg:py-36 text-center">

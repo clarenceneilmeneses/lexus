@@ -3,12 +3,28 @@ import { Clock, Mail, MapPin, Phone, type LucideIcon } from "lucide-react";
 import type { Catalog } from "../lib/types";
 import PageHeader from "../components/PageHeader";
 import ContactForm from "../components/ContactForm";
+import { useSeo } from "../lib/seo";
 
 export default function Contact() {
   const { catalog } = useOutletContext<{ catalog: Catalog }>();
   const c = catalog.settings.contact;
   const [params] = useSearchParams();
   const product = params.get("product");
+
+  useSeo(
+    {
+      title: "Contact & Request a Quote",
+      description: [
+        "Request a quote from Lexus Industrial.",
+        c.address && `Visit us at ${c.address}.`,
+        c.phone && `Call ${c.phone}`,
+        c.email && `or email ${c.email}.`,
+        c.hours && `Open ${c.hours}.`,
+      ].filter(Boolean).join(" "),
+      path: "/contact",
+    },
+    catalog.settings
+  );
 
   const InfoRow = ({ icon: Icon, label, value, href }: { icon: LucideIcon; label: string; value: string; href?: string }) => (
     <div className="card-ref px-5 py-4 flex gap-3.5 items-start">

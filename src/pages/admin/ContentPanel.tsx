@@ -367,8 +367,9 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
 
   return (
     <div>
-      {/* Sticky action bar — Save is always reachable, and shows whether there are unsaved edits. */}
-      <div className="sticky top-0 z-20 -mx-5 lg:-mx-8 px-5 lg:px-8 py-3 bg-paper/95 backdrop-blur border-b border-line-2 mb-4 flex items-center justify-between gap-3">
+      {/* Sticky action bar — the one and only Save, always reachable. Offsets
+          match the admin container's padding so the blur runs edge to edge. */}
+      <div className="sticky top-[58px] md:top-[70px] z-20 -mx-4 md:-mx-6 px-4 md:px-6 -mt-5 md:-mt-6 pt-5 md:pt-6 pb-3 bg-white/95 backdrop-blur border-b border-line-2 mb-4 flex items-center justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-[20px] leading-tight">Website content</h2>
           <p className="text-steel text-[12.5px] hidden sm:block">Edit the words and pictures visitors see on your website.</p>
@@ -771,12 +772,11 @@ export default function ContentPanel({ catalog, reload, canWrite }: { catalog: C
         </p>
       </Section>
 
-      {/* Bottom save reminder so editors don't have to scroll back up */}
+      {/* Status line only — Save itself lives in the sticky bar above. */}
       {canWrite && (
-        <div className="flex items-center justify-between gap-3 mt-5 pt-4 border-t border-line-2">
-          <span className="text-[13px] text-steel">{dirty ? "You have unsaved changes." : "Everything is saved."}</span>
-          <button className="btn btn-primary btn-sm" onClick={save} disabled={busy || !dirty}>{busy ? "Saving…" : "Save changes"}</button>
-        </div>
+        <p className="text-[13px] text-steel mt-5 pt-4 border-t border-line-2">
+          {dirty ? "You have unsaved changes — press Save changes at the top." : "Everything is saved."}
+        </p>
       )}
     </div>
   );

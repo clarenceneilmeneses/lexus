@@ -2,15 +2,59 @@ import { useState } from "react";
 import { Link, useOutletContext, useParams } from "react-router-dom";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import type { Catalog } from "../lib/types";
-import { cn, imgUrl, placeholder } from "../lib/utils";
+import { cn, imgUrl, placeholder, primaryImage } from "../lib/utils";
 import ProductCard from "../components/ProductCard";
 import CategoryIcon from "../components/CategoryIcon";
+import { useSeo, useJsonLd, productSchema, breadcrumbSchema } from "../lib/seo";
 
 export default function ProductDetail() {
   const { catalog } = useOutletContext<{ catalog: Catalog }>();
   const { slug } = useParams();
   const [idx, setIdx] = useState(0);
   const p = catalog.products.find((x) => x.slug === slug);
+  const category = catalog.categories.find((c) => c.id === p?.category_id);
+  const heroImage = p ? primaryImage(p) : null;
+
+  // Hooks must run on every render, including the "not found" branch below.
+  useSeo(
+    p
+      ? {
+          title: [p.brand, p.name, p.model].filter(Boolean).join(" "),
+          description:
+            p.short_description ||
+            p.description ||
+            `${p.name}${category ? ` — ${category.name}` : ""} available from Lexus Industrial. Request a quote for wholesale or retail supply in Metro Manila and nationwide.`,
+          image: heroImage,
+          type: "product",
+        }
+      : { title: "Product not found", noindex: true },
+    catalog.settings
+  );
+  useJsonLd(
+    "product",
+    p
+      ? productSchema({
+          name: p.name,
+          slug: p.slug,
+          brand: p.brand,
+          model: p.model,
+          description: p.short_description || p.description,
+          image: heroImage!,
+          category: category?.name,
+        })
+      : null
+  );
+  useJsonLd(
+    "breadcrumb",
+    p
+      ? breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Products", path: "/products" },
+          ...(category ? [{ name: category.name, path: `/products?cat=${category.slug}` }] : []),
+          { name: p.name, path: `/products/${p.slug}` },
+        ])
+      : null
+  );
 
   if (!p) {
     return (
@@ -24,7 +68,7 @@ export default function ProductDetail() {
     );
   }
 
-  const cat = catalog.categories.find((c) => c.id === p.category_id);
+  const cat = category;
   const gallery = p.images.length ? p.images.map((i) => imgUrl(i.storage_path)!) : [placeholder(p.name, p.model)];
   const related = catalog.products
     .filter((x) => x.id !== p.id && x.category_id === p.category_id)
